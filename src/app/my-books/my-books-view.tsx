@@ -5,12 +5,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { PencilIcon, Trash2Icon } from "lucide-react"
 import {
-  canUploadImages,
   CATEGORIES,
   deleteBook,
   fetchBooks,
   updateBook,
-  uploadImage,
   type Book,
 } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
@@ -88,6 +86,7 @@ export function MyBooksView() {
       author: String(data.author ?? "").trim(),
       category: String(data.category ?? CATEGORIES[0]),
       description: String(data.description ?? "").trim(),
+      bookNumber: String(data.bookNumber ?? "").trim(),
     }
 
     if (!payload.title || !payload.author || !payload.description) {
@@ -101,11 +100,9 @@ export function MyBooksView() {
 
     setSavingEdit(true)
     try {
-      const file = form.get("imageFile")
-      if (file instanceof File && file.size > 0) {
-        payload.image = await uploadImage(file)
-      } else if (String(data.image ?? "").trim()) {
-        payload.image = String(data.image ?? "").trim()
+      const imageUrl = String(data.image ?? "").trim()
+      if (imageUrl) {
+        payload.image = imageUrl
       }
 
       await updateBook(editing._id, payload, token)
@@ -163,16 +160,17 @@ export function MyBooksView() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="account-banner mb-7 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">My Books</h1>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-teal-800">Your little library</p>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">My Books</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             The books you have added — edit the details or remove them.
           </p>
         </div>
         <Link
           href="/add-book"
-          className="inline-flex h-8 items-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+          className="inline-flex h-10 items-center rounded-xl bg-teal-800 px-4 text-sm font-semibold text-white shadow-lg shadow-teal-950/15 transition-all hover:-translate-y-0.5 hover:bg-teal-700"
         >
           Add Book
         </Link>
@@ -209,7 +207,7 @@ export function MyBooksView() {
         <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
             <li key={book._id} className="h-full">
-              <article className="flex h-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+              <article className="book-card group flex h-full flex-col overflow-hidden">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
                   <Image
                     src={book.image}
@@ -217,9 +215,9 @@ export function MyBooksView() {
                     width={300}
                     height={400}
                     unoptimized
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-foreground/10">
+                  <span className="absolute top-3 left-3 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-950 shadow-sm ring-1 ring-amber-200/80">
                     {book.category}
                   </span>
                 </div>
@@ -287,6 +285,18 @@ export function MyBooksView() {
                   />
                 </div>
 
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-book-number">Book Number</Label>
+                  <Input
+                    id="edit-book-number"
+                    name="bookNumber"
+                    type="text"
+                    autoComplete="off"
+                    placeholder="ISBN, shelf or inventory number"
+                    defaultValue={editing.bookNumber}
+                  />
+                </div>
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid gap-2">
                     <Label htmlFor="edit-author">Author Name</Label>
@@ -325,20 +335,6 @@ export function MyBooksView() {
                     placeholder="https://…"
                     defaultValue={editing.image}
                   />
-                  {canUploadImages() ? (
-                    <div className="grid gap-2">
-                      <Label htmlFor="edit-image-file">
-                        Or upload a new cover
-                      </Label>
-                      <Input
-                        id="edit-image-file"
-                        name="imageFile"
-                        type="file"
-                        accept="image/*"
-                        className="h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
-                      />
-                    </div>
-                  ) : null}
                 </div>
 
                 <div className="grid gap-2">

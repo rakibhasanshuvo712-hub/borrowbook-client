@@ -25,6 +25,8 @@ type AuthContextValue = {
    */
   hydrated: boolean
   login: (user: User, token: string) => void
+  /** Updates the stored user (e.g. after editing the profile); keeps the token. */
+  updateUser: (user: User) => void
   logout: () => void
 }
 
@@ -79,6 +81,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(next)
   }, [])
 
+  const updateUser = React.useCallback((user: User) => {
+    setSession((prev) => {
+      if (!prev) return prev
+      const next: Session = { ...prev, user }
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        // Private mode / quota — the session then lasts for this tab only.
+      }
+      return next
+    })
+  }, [])
+
   const logout = React.useCallback(() => {
     try {
       window.localStorage.removeItem(STORAGE_KEY)
@@ -94,9 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token: session?.token ?? null,
       hydrated,
       login,
+      updateUser,
       logout,
     }),
-    [session, hydrated, login, logout]
+    [session, hydrated, login, updateUser, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

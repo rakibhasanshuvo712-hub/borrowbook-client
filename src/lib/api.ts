@@ -1,8 +1,11 @@
 /**
  * Thin client for the Express backend's 8 routes (+ POST /jwt).
- * Every call follows the same shape: fetch the endpoint, JSON in / JSON out,
- * and throw an Error carrying the server's `message` on failure so pages can
- * surface it in a toast.
+ *
+ * Every call follows the same shape: fetch `${API_BASE_URL}/<path>`, JSON in
+ * / JSON out, and throw an Error carrying the server's `message` on failure.
+ * Both local and deployed clients call same-origin proxy routes. The Next.js
+ * server forwards these to SERVER_API_URL, keeping auth cookies first-party
+ * and the backend URL out of browser bundles.
  */
 
 export const CATEGORIES = [
@@ -20,6 +23,12 @@ export type Book = {
   category: string
   image: string
   description: string
+  /** User-assigned identifier (ISBN, shelf number, inventory code, etc.). */
+  bookNumber: string
+  /** Total stock the owner declared when adding the book. */
+  totalCopies: number
+  /** Copies not currently borrowed — drives the Borrow / "Not Available" UI. */
+  availableCopies: number
   userName: string
   userEmail: string
   addedAt: string
@@ -39,17 +48,8 @@ export type Borrow = {
 export type NewBookInput = Omit<Book, "_id">
 export type NewBorrowInput = Omit<Borrow, "_id">
 
-const RAW_BASE = process.env.NEXT_PUBLIC_SERVER_BASE_URL ?? ""
-const BASE_URL = RAW_BASE.replace(/\/+$/, "")
-
-function baseUrl(): string {
-  if (!BASE_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_SERVER_BASE_URL is not set. Add it to .env and restart the dev server."
-    )
-  }
-  return BASE_URL
-}
+/** Base URL for backend API calls. */
+const API_BASE_URL = "/api/server"
 
 /** Local stand-in for books whose `image` field is empty or missing in the DB. */
 export const FALLBACK_COVER = "/covers/cover-teal.svg"
@@ -58,6 +58,22 @@ function str(value: unknown, fallback = ""): string {
   if (typeof value === "string") return value
   if (value == null) return fallback
   return String(value)
+}
+
+/**
+ * Coerces a stock-count field to a non-negative integer. Older documents
+ * predate the "Total Copies" challenge and store nothing here, so absent
+ * values fall back to 1 (a single lendable copy) rather than 0, which would
+ * otherwise disable borrowing on every legacy book.
+ */
+function toCount(...values: unknown[]): number {
+  for (const value of values) {
+    const n = typeof value === "string" ? Number(value) : value
+    if (typeof n === "number" && Number.isFinite(n) && n >= 0) {
+      return Math.floor(n)
+    }
+  }
+  return 1
 }
 
 /**
@@ -76,6 +92,9 @@ function normalizeBook(raw: unknown): Book {
     category: str(record.category, "Others"),
     image: str(record.image).trim() || FALLBACK_COVER,
     description: str(record.description),
+    bookNumber: str(record.bookNumber),
+    totalCopies: toCount(record.totalCopies, record.copies),
+    availableCopies: toCount(record.availableCopies, record.totalCopies, record.copies),
     userName: str(record.userName),
     userEmail: str(record.userEmail),
     addedAt: str(record.addedAt),
@@ -124,12 +143,10 @@ function authHeaders(token: string): Record<string, string> {
 
 /**
  * Exchanges the Better Auth session cookie for the JWT used on every private
- * route (POST /jwt). The cookie rides along through the same-origin proxy,
- * so the server signs a token only for a session it recognizes — the email
- * is never taken from the request body.
+ * route (POST /jwt).
  */
 export async function issueToken(): Promise<string> {
-  const res = await fetch(`${baseUrl()}/jwt`, {
+  const res = await fetch(`${API_BASE_URL}/jwt`, {
     method: "POST",
     credentials: "include",
   })
@@ -145,7 +162,7 @@ export async function issueToken(): Promise<string> {
 // ---------- books ----------
 
 export async function fetchBooks(): Promise<Book[]> {
-  const res = await fetch(`${baseUrl()}/books`)
+  const res = await fetch(`${API_BASE_URL}/books`)
   if (!res.ok) throw new Error(await readError(res))
   const data: unknown = await res.json()
   if (!Array.isArray(data)) {
@@ -155,7 +172,7 @@ export async function fetchBooks(): Promise<Book[]> {
 }
 
 export async function fetchBook(id: string): Promise<Book> {
-  const res = await fetch(`${baseUrl()}/books/${id}`)
+  const res = await fetch(`${API_BASE_URL}/books/${id}`)
   if (!res.ok) throw new Error(await readError(res))
   return normalizeBook(await res.json())
 }
@@ -164,7 +181,7 @@ export async function createBook(
   book: NewBookInput,
   token: string
 ): Promise<unknown> {
-  const res = await fetch(`${baseUrl()}/books`, {
+  const res = await fetch(`${API_BASE_URL}/books`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(token) },
     body: JSON.stringify(book),
@@ -178,7 +195,7 @@ export async function updateBook(
   book: Partial<NewBookInput>,
   token: string
 ): Promise<unknown> {
-  const res = await fetch(`${baseUrl()}/books/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/books/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...authHeaders(token) },
     body: JSON.stringify(book),
@@ -188,9 +205,22 @@ export async function updateBook(
 }
 
 export async function deleteBook(id: string, token: string): Promise<void> {
-  const res = await fetch(`${baseUrl()}/books/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/books/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
+  })
+  if (!res.ok) throw new Error(await readError(res))
+}
+
+export async function setAvailableCopies(
+  id: string,
+  availableCopies: number,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/books/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeaders(token) },
+    body: JSON.stringify({ availableCopies }),
   })
   if (!res.ok) throw new Error(await readError(res))
 }
@@ -201,7 +231,7 @@ export async function createBorrow(
   borrow: NewBorrowInput,
   token: string
 ): Promise<unknown> {
-  const res = await fetch(`${baseUrl()}/borrows`, {
+  const res = await fetch(`${API_BASE_URL}/borrows`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders(token) },
     body: JSON.stringify(borrow),
@@ -215,7 +245,7 @@ export async function fetchBorrows(
   token: string
 ): Promise<Borrow[]> {
   const res = await fetch(
-    `${baseUrl()}/borrows?email=${encodeURIComponent(email)}`,
+    `${API_BASE_URL}/borrows?email=${encodeURIComponent(email)}`,
     { headers: authHeaders(token) }
   )
   if (!res.ok) throw new Error(await readError(res))
@@ -227,52 +257,9 @@ export async function fetchBorrows(
 }
 
 export async function returnBorrow(id: string, token: string): Promise<void> {
-  const res = await fetch(`${baseUrl()}/borrows/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/borrows/${id}`, {
     method: "DELETE",
     headers: authHeaders(token),
   })
   if (!res.ok) throw new Error(await readError(res))
-}
-
-// ---------- image hosting ----------
-
-const IMGBB_KEY = process.env.NEXT_PUBLIC_IMGBB_API_KEY ?? ""
-
-/** True when cover uploads to imgbb are configured via NEXT_PUBLIC_IMGBB_API_KEY. */
-export function canUploadImages(): boolean {
-  return IMGBB_KEY.trim() !== ""
-}
-
-/** Uploads a file to imgbb and resolves with the hosted image URL. */
-export async function uploadImage(file: File): Promise<string> {
-  const key = IMGBB_KEY.trim()
-  if (!key) {
-    throw new Error(
-      "Image upload is not configured — paste an image URL instead."
-    )
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    throw new Error("That file is larger than 10 MB. Please pick a smaller image.")
-  }
-
-  const body = new FormData()
-  body.append("image", file)
-
-  const res = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, {
-    method: "POST",
-    body,
-  })
-  const data: unknown = await res.json().catch(() => null)
-  const payload = data as {
-    success?: boolean
-    data?: { url?: string }
-    error?: { message?: string }
-  } | null
-
-  if (!res.ok || !payload?.success || !payload.data?.url) {
-    throw new Error(
-      payload?.error?.message ?? `The upload failed (status ${res.status}).`
-    )
-  }
-  return payload.data.url
 }

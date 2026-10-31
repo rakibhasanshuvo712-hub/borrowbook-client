@@ -7,13 +7,15 @@
  * backend enforces the same minimum length (`minPasswordLength: 6` in
  * index.js) — these rules are the friendly client-side mirror of that.
  *
- * Registration goes through Better Auth (POST /api/auth/sign-up/email via
- * the same-origin proxy). The JWT used on private API routes is still issued
- * separately on login (POST /jwt), so sign-up only creates the account and
- * sends the user to /login.
+ * Registration goes through Better Auth (POST /api/auth/sign-up/email,
+ * called directly on the backend). A successful sign-up leaves a session
+ * cookie, which is then exchanged for the JWT (POST /jwt) used on private
+ * routes — so the visitor is signed in immediately and sent to the
+ * homepage rather than bounced through /login.
  */
 
 import { authClient } from "@/lib/auth-client"
+import { issueToken } from "@/lib/api"
 
 export const passwordRules = [
   {
@@ -52,25 +54,51 @@ export type RegisterInput = {
 }
 
 export type RegisterResult =
-  | { ok: true; user: { name: string; email: string } }
+  | { ok: true; user: { name: string; email: string }; token: string }
   | { ok: false; error: string }
 
 /**
- * Creates an account via Better Auth (POST /api/auth/sign-up/email through
- * the same-origin proxy). On success the visitor is sent to /login, where
- * the session cookie + JWT flow takes over — no token is issued here.
+ * Creates an account via Better Auth (POST /api/auth/sign-up/email,
+ * called directly on the backend). A successful sign-up sets the session
+ * cookie, which is then exchanged for the JWT (POST /jwt) so the caller is
+ * signed in immediately — no separate /login step.
  */
 export async function registerAccount(input: RegisterInput): Promise<RegisterResult> {
-  const { data, error } = await authClient.signUp.email({
-    name: input.name,
-    email: input.email,
-    password: input.password,
-  })
-  if (error) {
-    return { ok: false, error: error.message ?? "Could not create your account." }
-  }
-  return {
-    ok: true,
-    user: { name: data?.user.name ?? input.name, email: data?.user.email ?? input.email },
+  try {
+    const { data, error } = await authClient.signUp.email({
+      name: input.name,
+      email: input.email,
+      password: input.password,
+    })
+    if (error) {
+      return { ok: false, error: error.message ?? "Could not create your account." }
+    }
+    try {
+      const token = await issueToken()
+      return {
+        ok: true,
+        token,
+        user: {
+          name: data?.user.name ?? input.name,
+          email: data?.user.email ?? input.email,
+        },
+      }
+    } catch (err: unknown) {
+      return {
+        ok: false,
+        error:
+          err instanceof Error
+            ? `Account created, but sign-in failed: ${err.message}`
+            : "Account created, but sign-in failed.",
+      }
+    }
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error
+          ? `Registration failed: ${err.message}`
+          : "Registration failed. The backend may be unreachable.",
+    }
   }
 }

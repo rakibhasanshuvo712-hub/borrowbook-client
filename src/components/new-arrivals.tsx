@@ -81,7 +81,7 @@ export function NewArrivals() {
                     unoptimized
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-foreground/10">
+                  <span className="absolute top-3 left-3 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-950 shadow-sm ring-1 ring-amber-200/80">
                     {book.category}
                   </span>
                 </div>

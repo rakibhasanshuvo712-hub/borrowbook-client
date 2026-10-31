@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { BookOpenIcon } from "lucide-react"
-import { canUploadImages, CATEGORIES, createBook, uploadImage } from "@/lib/api"
+import { CATEGORIES, createBook } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
 import { toast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
@@ -35,19 +35,6 @@ export function AddBookForm() {
   const [submitting, setSubmitting] = React.useState(false)
   const [preview, setPreview] = React.useState("")
   const [previewFailed, setPreviewFailed] = React.useState(false)
-  const warnedMissingUploads = React.useRef(false)
-
-  // No imgbb key → cover uploads are off; say so once, then fall back to a URL.
-  React.useEffect(() => {
-    if (canUploadImages() || warnedMissingUploads.current) return
-    warnedMissingUploads.current = true
-    toast.add({
-      type: "warning",
-      title: "Cover uploads are disabled",
-      description:
-        "NEXT_PUBLIC_IMGBB_API_KEY is not set, so paste an image URL for the cover instead.",
-    })
-  }, [])
 
   if (!user || !token) return null
 
@@ -63,7 +50,9 @@ export function AddBookForm() {
     const author = String(data.author ?? "").trim()
     const description = String(data.description ?? "").trim()
     const category = String(data.category ?? CATEGORIES[0])
-    let image = String(data.image ?? "").trim()
+    const image = String(data.image ?? "").trim()
+    const bookNumber = String(data.bookNumber ?? "").trim()
+    const totalCopies = Math.max(1, Math.floor(Number(data.totalCopies) || 1))
 
     if (!title || !author || !description) {
       toast.add({
@@ -76,16 +65,6 @@ export function AddBookForm() {
 
     setSubmitting(true)
     try {
-      const file = form.get("imageFile")
-      if (file instanceof File && file.size > 0) {
-        toast.add({
-          type: "loading",
-          title: "Uploading cover…",
-          description: "Sending the image to imgbb.",
-        })
-        image = await uploadImage(file)
-      }
-
       if (!image) {
         toast.add({
           type: "error",
@@ -102,6 +81,9 @@ export function AddBookForm() {
           category,
           image,
           description,
+          bookNumber,
+          totalCopies,
+          availableCopies: totalCopies,
           userName: user.name,
           userEmail: user.email,
           addedAt: new Date().toISOString(),
@@ -129,16 +111,15 @@ export function AddBookForm() {
     }
   }
 
-  const uploads = canUploadImages()
   const previewSrc = preview.trim()
   const showPreview = previewSrc !== "" && !previewFailed
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
+    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_12%_18%,_var(--tw-gradient-stops))] from-amber-100/70 via-transparent to-fuchsia-100/60 px-4 py-10 sm:px-6">
       <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-lg">Add a New Book</CardTitle>
-          <CardDescription>
+        <CardHeader className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-100 px-6 py-6 sm:px-8">
+          <CardTitle className="text-xl font-semibold">Add a New Book</CardTitle>
+          <CardDescription className="text-foreground/70">
             Fill in the details to share a book with the BookNook community.
           </CardDescription>
         </CardHeader>
@@ -155,6 +136,34 @@ export function AddBookForm() {
                 required
                 autoComplete="off"
                 placeholder="e.g. The Midnight Library"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="book-number">Book Number</Label>
+              <Input
+                id="book-number"
+                name="bookNumber"
+                type="text"
+                autoComplete="off"
+                placeholder="e.g. ISBN, shelf or inventory number"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="book-total-copies">
+                Total Copies <RequiredMark />
+              </Label>
+              <Input
+                id="book-total-copies"
+                name="totalCopies"
+                type="number"
+                min={1}
+                step={1}
+                defaultValue={1}
+                required
+                autoComplete="off"
+                placeholder="How many copies can be borrowed at once?"
               />
             </div>
 
@@ -193,49 +202,38 @@ export function AddBookForm() {
               <Label htmlFor="book-image">
                 Book Image <RequiredMark />
               </Label>
-              {uploads ? (
+              <div className="flex items-center gap-3">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:size-20">
+                  {showPreview ? (
+                    <Image
+                      src={previewSrc}
+                      alt="Cover preview"
+                      fill
+                      sizes="80px"
+                      unoptimized
+                      className="object-cover"
+                      onError={() => setPreviewFailed(true)}
+                    />
+                  ) : (
+                    <span className="flex size-full items-center justify-center text-muted-foreground">
+                      <BookOpenIcon className="size-6" />
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="book-image"
-                  name="imageFile"
-                  type="file"
-                  accept="image/*"
+                  name="image"
+                  type="url"
                   required
-                  className="h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                  autoComplete="off"
+                  className="min-w-0 flex-1"
+                  placeholder="https://… or /covers/my-book.svg"
+                  onChange={(event) => {
+                    setPreview(event.target.value)
+                    setPreviewFailed(false)
+                  }}
                 />
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:size-20">
-                    {showPreview ? (
-                      <Image
-                        src={previewSrc}
-                        alt="Cover preview"
-                        fill
-                        sizes="80px"
-                        unoptimized
-                        className="object-cover"
-                        onError={() => setPreviewFailed(true)}
-                      />
-                    ) : (
-                      <span className="flex size-full items-center justify-center text-muted-foreground">
-                        <BookOpenIcon className="size-6" />
-                      </span>
-                    )}
-                  </div>
-                  <Input
-                    id="book-image"
-                    name="image"
-                    type="url"
-                    required
-                    autoComplete="off"
-                    className="min-w-0 flex-1"
-                    placeholder="https://… or /covers/my-book.svg"
-                    onChange={(event) => {
-                      setPreview(event.target.value)
-                      setPreviewFailed(false)
-                    }}
-                  />
-                </div>
-              )}
+              </div>
             </div>
 
             <div className="grid gap-2">

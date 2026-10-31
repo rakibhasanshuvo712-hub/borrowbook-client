@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { BookOpenCheckIcon, SparklesIcon } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
@@ -48,10 +49,21 @@ export function BooksGrid() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="text-2xl font-semibold tracking-tight">All Books</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Every title on our shelves — pick one and view the details to borrow it.
-      </p>
+      <header className="relative mb-9 flex items-center justify-between gap-6 overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-orange-50 to-fuchsia-100 px-6 py-8 ring-1 ring-white/80 sm:px-9 sm:py-10">
+        <div aria-hidden="true" className="absolute -right-8 -bottom-28 size-64 rounded-full border-[2rem] border-white/40" />
+        <div className="relative">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-900/10">
+            <SparklesIcon className="size-3.5" /> The community shelf
+          </span>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">All Books</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-foreground/70 sm:text-base">
+            Every title on our shelves. Find a story that feels like it was waiting for you.
+          </p>
+        </div>
+        <div className="relative hidden size-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-700 to-emerald-500 text-white shadow-xl shadow-teal-900/15 sm:flex">
+          <BookOpenCheckIcon className="size-9" />
+        </div>
+      </header>
 
       {books === null ? (
         error ? (
@@ -82,7 +94,7 @@ export function BooksGrid() {
         <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
             <li key={book._id} className="h-full">
-              <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow duration-200 hover:shadow-md">
+              <article className="book-card group flex h-full flex-col overflow-hidden">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
                   <Image
                     src={book.image}
@@ -92,7 +104,7 @@ export function BooksGrid() {
                     unoptimized
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                  <span className="absolute top-3 left-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-medium text-foreground ring-1 ring-foreground/10">
+                  <span className="absolute top-3 left-3 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-950 shadow-sm ring-1 ring-amber-200/80">
                     {book.category}
                   </span>
                 </div>

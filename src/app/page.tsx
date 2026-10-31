@@ -62,9 +62,16 @@ const reviews = [
   },
 ]
 
+const stepTones = [
+  "bg-amber-200 text-amber-950",
+  "bg-teal-200 text-teal-950",
+  "bg-fuchsia-200 text-fuchsia-950",
+  "bg-orange-200 text-orange-950",
+]
+
 export default function HomePage() {
   return (
-    <div className="flex flex-1 flex-col bg-lime-100">
+    <div className="flex flex-1 flex-col bg-transparent">
       <h1 className="sr-only">
         BookNook — discover, borrow, and share books
       </h1>
@@ -78,7 +85,7 @@ export default function HomePage() {
 
       <NewArrivals />
 
-      <section aria-labelledby="how-it-works-heading" className="bg-white/50">
+      <section aria-labelledby="how-it-works-heading" className="shelf-panel">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
           <SectionHeading
             id="how-it-works-heading"
@@ -91,13 +98,13 @@ export default function HomePage() {
               return (
                 <li
                   key={step.title}
-                  className="h-full rounded-xl bg-background p-6 ring-1 ring-foreground/10"
+                  className="step-card h-full rounded-2xl bg-background/80 p-6 shadow-md shadow-teal-950/[0.04] ring-1 ring-white/70 transition-transform duration-200 hover:-translate-y-1"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                    <span className={`flex size-11 items-center justify-center rounded-2xl shadow-sm ${stepTones[index]}`}>
                       <Icon className="size-5" />
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground">
+                    <span className="rounded-full bg-white/75 px-2.5 py-1 text-xs font-semibold text-foreground/65 ring-1 ring-foreground/5">
                       Step {index + 1}
                     </span>
                   </div>
@@ -120,12 +127,12 @@ export default function HomePage() {
             subtitle="What our members say about life at BookNook."
           />
           <ul className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {reviews.map((review) => (
+            {reviews.map((review, index) => (
               <li
                 key={review.name}
-                className="flex h-full flex-col rounded-xl bg-card p-6 ring-1 ring-foreground/10"
+                className="reader-card flex h-full flex-col rounded-2xl bg-card p-6 ring-1 ring-white/70"
               >
-                <QuoteIcon className="size-5 text-muted-foreground/60" />
+                <QuoteIcon className={`size-5 ${["text-amber-600", "text-teal-700", "text-fuchsia-700"][index]}`} />
                 <p className="mt-4 flex-1 text-sm leading-relaxed text-foreground/80">
                   {review.quote}
                 </p>

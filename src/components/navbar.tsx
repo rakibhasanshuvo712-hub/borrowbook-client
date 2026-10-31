@@ -31,13 +31,18 @@ const privateLinks = [
   { href: "/my-borrows", label: "My Borrows" },
 ] as const
 
-const HEADER_CLASS = "sticky top-0 z-40 border-b border-teal-900/20 bg-teal-700/95 backdrop-blur"
+const HEADER_CLASS = "sticky top-0 z-40 border-b border-amber-200/20 bg-gradient-to-r from-teal-950 via-teal-900 to-emerald-950 shadow-lg shadow-teal-950/10 backdrop-blur"
 const INNER_CLASS =
   "mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6"
 const LOGIN_CLASS = buttonVariants({
   variant: "outline",
   size: "sm",
   className: "border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white",
+})
+const REGISTER_CLASS = buttonVariants({
+  variant: "default",
+  size: "sm",
+  className: "bg-amber-300 text-teal-950 shadow-sm shadow-black/10 hover:bg-amber-200",
 })
 
 function isActive(pathname: string | null, href: string) {
@@ -72,8 +77,8 @@ function NavLinks({
           className={cn(
             "rounded-md px-3 py-1.5 text-sm transition-colors",
             isActive(pathname, link.href)
-              ? "bg-white/20 font-medium text-white"
-              : "text-teal-100 hover:bg-white/10 hover:text-white"
+              ? "bg-amber-300 font-semibold text-teal-950 shadow-sm"
+              : "text-teal-100 hover:bg-white/10 hover:text-amber-100"
           )}
         >
           {link.label}
@@ -84,7 +89,12 @@ function NavLinks({
 }
 
 function SignedOutActions() {
-  return <Link href="/login" className={LOGIN_CLASS}>Login</Link>
+  return (
+    <div className="flex items-center gap-2">
+      <Link href="/login" className={LOGIN_CLASS}>Login</Link>
+      <Link href="/register" className={REGISTER_CLASS}>Register</Link>
+    </div>
+  )
 }
 
 export function Navbar() {

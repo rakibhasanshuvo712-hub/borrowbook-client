@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { BookOpenIcon, SparklesIcon } from "lucide-react"
 import { issueToken } from "@/lib/api"
 import { authClient } from "@/lib/auth-client"
 import { useAuth } from "@/lib/auth-context"
@@ -21,8 +22,9 @@ import { Spinner } from "@/components/ui/spinner"
 
 /**
  * Email + password are verified server-side by Better Auth (POST
- * /api/auth/sign-in/email through the proxy). A successful sign-in leaves a
- * session cookie on the backend, which is then exchanged for the JWT
+ * /api/auth/sign-in/email, called directly on the backend). A successful
+ * sign-in leaves a session cookie on the backend, which is then exchanged
+ * for the JWT
  * (POST /jwt) used as `Authorization: Bearer …` on every private route.
  */
 export function LoginForm() {
@@ -30,8 +32,21 @@ export function LoginForm() {
   const router = useRouter()
   const [submitting, setSubmitting] = React.useState(false)
 
+  function destination() {
+    const requested = new URLSearchParams(window.location.search).get("next")
+    return requested?.startsWith("/") && !requested.startsWith("//")
+      ? requested
+      : "/"
+  }
+
   React.useEffect(() => {
-    if (user) router.replace("/")
+    if (user) {
+      const requested = new URLSearchParams(window.location.search).get("next")
+      const next = requested?.startsWith("/") && !requested.startsWith("//")
+        ? requested
+        : "/"
+      router.replace(next)
+    }
   }, [user, router])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -79,7 +94,7 @@ export function LoginForm() {
         title: "Signed in",
         description: `Welcome back, ${data?.user.name || email}!`,
       })
-      router.push("/")
+      router.push(destination())
     } catch (error: unknown) {
       toast.add({
         type: "error",
@@ -93,15 +108,31 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-lg">Welcome back</CardTitle>
-          <CardDescription>
+    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-amber-100 via-background to-emerald-100 px-4 py-12 sm:px-6">
+      <div className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-fuchsia-300/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-16 size-72 rounded-full bg-lime-300/30 blur-3xl" />
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-card shadow-2xl shadow-teal-950/10 ring-1 ring-teal-900/10 md:grid-cols-2">
+        <aside className="relative hidden min-h-[620px] flex-col justify-between overflow-hidden bg-gradient-to-br from-teal-800 via-emerald-700 to-lime-600 p-10 text-white md:flex">
+          <div className="absolute -right-16 -bottom-20 size-72 rounded-full border-[36px] border-white/10" />
+          <div className="absolute top-28 -right-8 size-44 rounded-full border border-white/20" />
+          <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur">
+            <BookOpenIcon className="size-7" />
+          </div>
+          <div className="relative max-w-sm">
+            <SparklesIcon className="mb-5 size-6 text-amber-200" />
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight">A little more wonder on your shelf.</h1>
+            <p className="mt-4 text-base leading-relaxed text-white/80">Find your next favourite, share a story with your neighbours, and pick up right where you left off.</p>
+          </div>
+          <p className="relative text-sm text-white/70">Good stories travel further together.</p>
+        </aside>
+        <Card className="w-full max-w-sm justify-self-center self-center bg-transparent py-0 ring-0 shadow-none">
+        <CardHeader className="bg-gradient-to-r from-teal-800 to-emerald-600 px-6 py-6 text-white sm:px-8">
+          <CardTitle className="text-xl font-semibold">Welcome back</CardTitle>
+          <CardDescription className="text-white/80">
             Sign in to borrow books and manage your shelf.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-7 sm:px-8">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="login-email">Email</Label>
@@ -146,7 +177,8 @@ export function LoginForm() {
             </Link>
           </p>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }

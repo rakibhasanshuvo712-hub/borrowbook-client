@@ -24,8 +24,10 @@ const contact = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-teal-900/20 bg-teal-800 text-teal-50">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-2">
+    <footer className="relative overflow-hidden border-t border-amber-300/25 bg-gradient-to-br from-teal-950 via-teal-900 to-violet-950 text-teal-50">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-32 right-8 size-72 rounded-full border-[1.5rem] border-white/[0.035]" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-20 size-80 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2">
         <div className="space-y-4">
           <Logo className="text-white" />
           <p className="max-w-sm text-sm text-teal-100/80">
@@ -44,7 +46,7 @@ export function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.label}
-                      className="inline-flex size-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-teal-50 transition-colors hover:bg-white/20 hover:text-white"
+                      className="inline-flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.07] text-teal-50 transition-all hover:-translate-y-0.5 hover:border-amber-200/60 hover:bg-amber-200/15 hover:text-amber-100"
                     >
                       <Icon className="size-4" />
                     </a>
