@@ -1,23 +1,20 @@
-import type { User } from "@/lib/auth-context"
-
-export type RegisterInput = {
-  name: string
-  email: string
-  photo: string
-  password: string
-}
-
-export type RegisterResult = { ok: true } | { ok: false; error: string }
-
-export type GoogleLoginResult =
-  | { ok: true; user: User }
-  | { ok: false; error: string }
-
 /**
- * Password rules for registration. Each rule carries the label shown in the
- * live checklist and a short hint used to build the error sentence, so the
- * form and the validation can never drift apart.
+ * Password rules shared by the register form's live checklist, plus the
+ * client-side sign-up call.
+ *
+ * Accounts themselves live on the server: Better Auth (on the Express
+ * backend) stores users and scrypt-hashed passwords in MongoDB, and the
+ * backend enforces the same minimum length (`minPasswordLength: 6` in
+ * index.js) — these rules are the friendly client-side mirror of that.
+ *
+ * Registration goes through Better Auth (POST /api/auth/sign-up/email via
+ * the same-origin proxy). The JWT used on private API routes is still issued
+ * separately on login (POST /jwt), so sign-up only creates the account and
+ * sends the user to /login.
  */
+
+import { authClient } from "@/lib/auth-client"
+
 export const passwordRules = [
   {
     label: "Uppercase letter",
@@ -48,62 +45,32 @@ export function passwordErrorMessage(password: string): string | null {
   return `Password must have ${problems.map((rule) => rule.hint).join(", ")}.`
 }
 
-function readApiError(payload: unknown, status: number): string {
-  const fallback = `The server rejected the registration (status ${status}).`
-  if (typeof payload !== "object" || payload === null) return fallback
-  const { message, error } = payload as { message?: unknown; error?: unknown }
-  if (typeof message === "string" && message.trim()) return message
-  if (typeof error === "string" && error.trim()) return error
-  return fallback
+export type RegisterInput = {
+  name: string
+  email: string
+  password: string
 }
 
-/**
- * Submits a new account to the backend (POST /register — adjust the path to
- * match your server's route). With no NEXT_PUBLIC_SERVER_URL configured there
- * is no backend yet, so the registration is accepted in demo mode to keep the
- * flow testable, mirroring addBook in books.ts.
- */
-export async function registerUser(
-  input: RegisterInput
-): Promise<RegisterResult> {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL
-  if (!baseUrl) return { ok: true }
+export type RegisterResult =
+  | { ok: true; user: { name: string; email: string } }
+  | { ok: false; error: string }
 
-  try {
-    const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    })
-    if (!res.ok) {
-      let payload: unknown = null
-      try {
-        payload = await res.json()
-      } catch {
-        // Non-JSON error body — fall back to the status message.
-      }
-      return { ok: false, error: readApiError(payload, res.status) }
-    }
-    return { ok: true }
-  } catch {
-    return { ok: false, error: "Could not reach the server. Please try again." }
+/**
+ * Creates an account via Better Auth (POST /api/auth/sign-up/email through
+ * the same-origin proxy). On success the visitor is sent to /login, where
+ * the session cookie + JWT flow takes over — no token is issued here.
+ */
+export async function registerAccount(input: RegisterInput): Promise<RegisterResult> {
+  const { data, error } = await authClient.signUp.email({
+    name: input.name,
+    email: input.email,
+    password: input.password,
+  })
+  if (error) {
+    return { ok: false, error: error.message ?? "Could not create your account." }
   }
-}
-
-/**
- * Mock Google round-trip so the social-login flow is testable without OAuth
- * credentials. Swap the body for Firebase `signInWithPopup` (or your backend's
- * Google OAuth redirect/exchange) once a provider is configured — the caller
- * only depends on the returned user shape.
- */
-export async function loginWithGoogle(): Promise<GoogleLoginResult> {
-  await new Promise((resolve) => setTimeout(resolve, 600))
   return {
     ok: true,
-    user: {
-      name: "Google Reader",
-      email: "reader@gmail.com",
-      photo: "/avatar.svg",
-    },
+    user: { name: data?.user.name ?? input.name, email: data?.user.email ?? input.email },
   }
 }

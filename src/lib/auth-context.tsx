@@ -8,29 +8,95 @@ export type User = {
   photo?: string
 }
 
+export type Session = {
+  user: User
+  /** JWT from POST /jwt — sent as `Authorization: Bearer <token>`. */
+  token: string
+}
+
 type AuthContextValue = {
   user: User | null
-  login: (user: User) => void
+  token: string | null
+  /**
+   * False until the stored session (localStorage) has been read on the client.
+   * Private routes must wait for this before deciding to redirect, otherwise
+   * the first paint (signed out on the server) would bounce a logged-in user
+   * to /login.
+   */
+  hydrated: boolean
+  login: (user: User, token: string) => void
   logout: () => void
 }
 
 const AuthContext = React.createContext<AuthContextValue | null>(null)
 
+const STORAGE_KEY = "booknook.session"
+
+function readSession(): Session | null {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<Session>
+    if (!parsed?.user?.email || typeof parsed.token !== "string") return null
+    return {
+      user: {
+        name: String(parsed.user.name ?? ""),
+        email: String(parsed.user.email),
+        photo: parsed.user.photo,
+      },
+      token: parsed.token,
+    }
+  } catch {
+    return null
+  }
+}
+
 /**
- * Mock session kept in memory: state only changes inside event handlers
- * (login/logout), so server and client render the same signed-out UI on the
- * first paint. Replace with a real auth provider (cookie/JWT backed) when a
- * backend exists — persistence across reloads is intentionally not faked here.
+ * Session kept in localStorage: the server renders the signed-out UI, then the
+ * stored session is restored in an effect after hydration (`hydrated` flag),
+ * so server and client agree on the first paint.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null)
+  const [session, setSession] = React.useState<Session | null>(null)
+  const [hydrated, setHydrated] = React.useState(false)
 
-  const login = React.useCallback((next: User) => setUser(next), [])
-  const logout = React.useCallback(() => setUser(null), [])
+  React.useEffect(() => {
+    // Intentional one-time hydration from an external store (localStorage);
+    // the signed-out server render is replaced here rather than during
+    // hydration to keep server and client markup in sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSession(readSession())
+    setHydrated(true)
+  }, [])
+
+  const login = React.useCallback((user: User, token: string) => {
+    const next: Session = { user, token }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    } catch {
+      // Private mode / quota — the session then lasts for this tab only.
+    }
+    setSession(next)
+  }, [])
+
+  const logout = React.useCallback(() => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Ignore storage failures; state is cleared either way.
+    }
+    setSession(null)
+  }, [])
 
   const value = React.useMemo(
-    () => ({ user, login, logout }),
-    [user, login, logout]
+    () => ({
+      user: session?.user ?? null,
+      token: session?.token ?? null,
+      hydrated,
+      login,
+      logout,
+    }),
+    [session, hydrated, login, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

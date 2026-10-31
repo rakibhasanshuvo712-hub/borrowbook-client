@@ -1,14 +1,16 @@
+import type { Metadata } from "next"
 import { RequireAuth } from "@/components/require-auth"
-import { PagePlaceholder } from "@/components/page-placeholder"
+import { MyBorrowsView } from "./my-borrows-view"
+
+export const metadata: Metadata = {
+  title: "BookNook | My Borrows",
+  description: "The books you have borrowed, with their return dates.",
+}
 
 export default function MyBorrowsPage() {
   return (
     <RequireAuth>
-      <PagePlaceholder
-        title="My Borrows"
-        description="Books you are currently borrowing, plus your borrow history."
-        note="Your borrow list will appear here."
-      />
+      <MyBorrowsView />
     </RequireAuth>
   )
 }

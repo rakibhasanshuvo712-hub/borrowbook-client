@@ -68,7 +68,7 @@ function SlideContent({ slide }: { slide: Slide }) {
           {slide.text}
         </p>
         <Link
-          href="/all-books"
+          href="/books"
           className={cn(buttonVariants({ size: "lg" }), "mt-7")}
         >
           Browse Books

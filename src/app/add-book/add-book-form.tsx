@@ -3,9 +3,10 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { BookOpenIcon, CircleCheckIcon, TriangleAlertIcon } from "lucide-react"
-import { addBook, type NewBookInput } from "@/lib/books"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { BookOpenIcon } from "lucide-react"
+import { canUploadImages, CATEGORIES, createBook, uploadImage } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
+import { toast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -20,38 +21,6 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 
-const bookTypes = ["Physical", "E-book", "Audiobook"]
-
-const categories = [
-  "Fiction",
-  "Thriller",
-  "Mystery",
-  "Science Fiction",
-  "Fantasy",
-  "Self-Help",
-  "History",
-  "Biography",
-  "Classic",
-  "Children's",
-]
-
-const initialForm = {
-  name: "",
-  author: "",
-  image: "",
-  type: bookTypes[0],
-  category: categories[0],
-  copies: "1",
-  description: "",
-}
-
-type FormState = typeof initialForm
-
-type Status =
-  | { kind: "idle" }
-  | { kind: "success"; title: string }
-  | { kind: "error"; message: string }
-
 function RequiredMark() {
   return (
     <span aria-hidden="true" className="text-destructive">
@@ -61,57 +30,107 @@ function RequiredMark() {
 }
 
 export function AddBookForm() {
-  const [form, setForm] = React.useState<FormState>(initialForm)
-  const [status, setStatus] = React.useState<Status>({ kind: "idle" })
+  const { user, token } = useAuth()
+  const formRef = React.useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = React.useState(false)
+  const [preview, setPreview] = React.useState("")
   const [previewFailed, setPreviewFailed] = React.useState(false)
+  const warnedMissingUploads = React.useRef(false)
 
-  function update<Key extends keyof FormState>(
-    key: Key,
-    value: FormState[Key]
-  ) {
-    setForm((prev) => ({ ...prev, [key]: value }))
-    if (key === "image") setPreviewFailed(false)
-    setStatus((prev) => (prev.kind === "idle" ? prev : { kind: "idle" }))
-  }
+  // No imgbb key → cover uploads are off; say so once, then fall back to a URL.
+  React.useEffect(() => {
+    if (canUploadImages() || warnedMissingUploads.current) return
+    warnedMissingUploads.current = true
+    toast.add({
+      type: "warning",
+      title: "Cover uploads are disabled",
+      description:
+        "NEXT_PUBLIC_IMGBB_API_KEY is not set, so paste an image URL for the cover instead.",
+    })
+  }, [])
+
+  if (!user || !token) return null
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (submitting || !user || !token) return
 
-    const image = form.image.trim()
-    if (!/^https?:\/\/\S/.test(image) && !image.startsWith("/")) {
-      setStatus({
-        kind: "error",
-        message:
-          "Enter a valid image URL, such as https://… or /covers/my-book.svg.",
+    const formEl = event.currentTarget
+    const form = new FormData(formEl)
+    const data = Object.fromEntries(form.entries())
+
+    const title = String(data.title ?? "").trim()
+    const author = String(data.author ?? "").trim()
+    const description = String(data.description ?? "").trim()
+    const category = String(data.category ?? CATEGORIES[0])
+    let image = String(data.image ?? "").trim()
+
+    if (!title || !author || !description) {
+      toast.add({
+        type: "error",
+        title: "Missing details",
+        description: "Title, author and description are all required.",
       })
       return
     }
 
-    const title = form.name.trim()
     setSubmitting(true)
-    const payload: NewBookInput = {
-      title,
-      author: form.author.trim(),
-      image,
-      type: form.type,
-      category: form.category,
-      quantity: Math.max(1, Number.parseInt(form.copies, 10) || 1),
-      description: form.description.trim(),
-    }
-    const result = await addBook(payload)
-    setSubmitting(false)
+    try {
+      const file = form.get("imageFile")
+      if (file instanceof File && file.size > 0) {
+        toast.add({
+          type: "loading",
+          title: "Uploading cover…",
+          description: "Sending the image to imgbb.",
+        })
+        image = await uploadImage(file)
+      }
 
-    if (result.ok) {
-      setStatus({ kind: "success", title })
-      setForm(initialForm)
+      if (!image) {
+        toast.add({
+          type: "error",
+          title: "Cover image required",
+          description: "Upload a cover or paste an image URL first.",
+        })
+        return
+      }
+
+      await createBook(
+        {
+          title,
+          author,
+          category,
+          image,
+          description,
+          userName: user.name,
+          userEmail: user.email,
+          addedAt: new Date().toISOString(),
+        },
+        token
+      )
+
+      toast.add({
+        type: "success",
+        title: "Book added",
+        description: `“${title}” is now on your shelf.`,
+      })
+      formEl.reset()
+      setPreview("")
       setPreviewFailed(false)
-    } else {
-      setStatus({ kind: "error", message: result.error })
+    } catch (error: unknown) {
+      toast.add({
+        type: "error",
+        title: "Could not add the book",
+        description:
+          error instanceof Error ? error.message : "Something went wrong.",
+      })
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  const previewSrc = form.image.trim()
+  const uploads = canUploadImages()
+  const previewSrc = preview.trim()
   const showPreview = previewSrc !== "" && !previewFailed
 
   return (
@@ -124,56 +143,25 @@ export function AddBookForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {status.kind === "success" && (
-            <div
-              role="status"
-              className="mb-4 flex items-start gap-2 rounded-lg border border-emerald-600/30 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-100"
-            >
-              <CircleCheckIcon className="mt-0.5 size-4 shrink-0" />
-              <div>
-                <p className="font-medium">Book added</p>
-                <p className="text-emerald-800/80 dark:text-emerald-200/80">
-                  “{status.title}” is now in your collection.{" "}
-                  <Link
-                    href="/my-books"
-                    className="font-medium underline underline-offset-3"
-                  >
-                    View My Books
-                  </Link>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {status.kind === "error" && (
-            <Alert variant="destructive" className="mb-4">
-              <TriangleAlertIcon />
-              <AlertTitle>Could not add the book</AlertTitle>
-              <AlertDescription>{status.message}</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="book-name">
-                Book Name <RequiredMark />
+              <Label htmlFor="book-title">
+                Book Title <RequiredMark />
               </Label>
               <Input
-                id="book-name"
-                name="name"
+                id="book-title"
+                name="title"
                 type="text"
                 required
                 autoComplete="off"
                 placeholder="e.g. The Midnight Library"
-                value={form.name}
-                onChange={(event) => update("name", event.target.value)}
               />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="book-author">
-                  Author <RequiredMark />
+                  Author Name <RequiredMark />
                 </Label>
                 <Input
                   id="book-author"
@@ -182,111 +170,111 @@ export function AddBookForm() {
                   required
                   autoComplete="off"
                   placeholder="e.g. Matt Haig"
-                  value={form.author}
-                  onChange={(event) => update("author", event.target.value)}
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="book-type">Type</Label>
-                <NativeSelect
-                  id="book-type"
-                  name="type"
-                  className="w-full"
-                  value={form.type}
-                  onChange={(event) => update("type", event.target.value)}
-                >
-                  {bookTypes.map((type) => (
-                    <NativeSelectOption key={type} value={type}>
-                      {type}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="book-category">Category</Label>
                 <NativeSelect
                   id="book-category"
                   name="category"
                   className="w-full"
-                  value={form.category}
-                  onChange={(event) => update("category", event.target.value)}
+                  defaultValue={CATEGORIES[0]}
                 >
-                  {categories.map((category) => (
+                  {CATEGORIES.map((category) => (
                     <NativeSelectOption key={category} value={category}>
                       {category}
                     </NativeSelectOption>
                   ))}
                 </NativeSelect>
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="book-copies">Copies</Label>
-                <Input
-                  id="book-copies"
-                  name="copies"
-                  type="number"
-                  min={1}
-                  inputMode="numeric"
-                  value={form.copies}
-                  onChange={(event) => update("copies", event.target.value)}
-                />
-              </div>
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="book-image">
-                Image URL <RequiredMark />
+                Book Image <RequiredMark />
               </Label>
-              <div className="flex items-center gap-3">
-                <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:size-20">
-                  {showPreview ? (
-                    <Image
-                      src={previewSrc}
-                      alt="Cover preview"
-                      fill
-                      sizes="80px"
-                      unoptimized
-                      className="object-cover"
-                      onError={() => setPreviewFailed(true)}
-                    />
-                  ) : (
-                    <span className="flex size-full items-center justify-center text-muted-foreground">
-                      <BookOpenIcon className="size-6" />
-                    </span>
-                  )}
-                </div>
+              {uploads ? (
                 <Input
                   id="book-image"
-                  name="image"
-                  type="text"
+                  name="imageFile"
+                  type="file"
+                  accept="image/*"
                   required
-                  autoComplete="off"
-                  className="min-w-0 flex-1"
-                  placeholder="https://… or /covers/my-book.svg"
-                  value={form.image}
-                  onChange={(event) => update("image", event.target.value)}
+                  className="h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
                 />
-              </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:size-20">
+                    {showPreview ? (
+                      <Image
+                        src={previewSrc}
+                        alt="Cover preview"
+                        fill
+                        sizes="80px"
+                        unoptimized
+                        className="object-cover"
+                        onError={() => setPreviewFailed(true)}
+                      />
+                    ) : (
+                      <span className="flex size-full items-center justify-center text-muted-foreground">
+                        <BookOpenIcon className="size-6" />
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="book-image"
+                    name="image"
+                    type="url"
+                    required
+                    autoComplete="off"
+                    className="min-w-0 flex-1"
+                    placeholder="https://… or /covers/my-book.svg"
+                    onChange={(event) => {
+                      setPreview(event.target.value)
+                      setPreviewFailed(false)
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="book-description">
-                Description <RequiredMark />
+                Short Description <RequiredMark />
               </Label>
               <Textarea
                 id="book-description"
                 name="description"
                 required
-                rows={5}
+                rows={4}
                 maxLength={2000}
                 placeholder="A short summary that helps readers decide what to pick up next."
-                value={form.description}
-                onChange={(event) =>
-                  update("description", event.target.value)
-                }
               />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="book-user-name">User Name</Label>
+                <Input
+                  id="book-user-name"
+                  name="userName"
+                  type="text"
+                  readOnly
+                  defaultValue={user.name}
+                  className="text-muted-foreground"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="book-user-email">User Email</Label>
+                <Input
+                  id="book-user-email"
+                  name="userEmail"
+                  type="email"
+                  readOnly
+                  defaultValue={user.email}
+                  className="text-muted-foreground"
+                />
+              </div>
             </div>
 
             <Button type="submit" disabled={submitting} className="w-full">
@@ -300,6 +288,16 @@ export function AddBookForm() {
               )}
             </Button>
           </form>
+
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Added a book by mistake?{" "}
+            <Link
+              href="/my-books"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Manage My Books
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
