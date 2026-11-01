@@ -212,19 +212,6 @@ export async function deleteBook(id: string, token: string): Promise<void> {
   if (!res.ok) throw new Error(await readError(res))
 }
 
-export async function setAvailableCopies(
-  id: string,
-  availableCopies: number,
-  token: string
-): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/books/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...authHeaders(token) },
-    body: JSON.stringify({ availableCopies }),
-  })
-  if (!res.ok) throw new Error(await readError(res))
-}
-
 // ---------- borrows ----------
 
 export async function createBorrow(

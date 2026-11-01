@@ -107,11 +107,19 @@ export function BooksGrid() {
                   <span className="absolute top-3 left-3 rounded-full bg-amber-100/95 px-3 py-1 text-xs font-semibold text-amber-950 shadow-sm ring-1 ring-amber-200/80">
                     {book.category}
                   </span>
+                  <span className="absolute right-3 bottom-3 rounded-full bg-teal-950/85 px-3 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur">
+                    {book.availableCopies} of {book.totalCopies} available
+                  </span>
                 </div>
                 <div className="flex flex-1 flex-col p-4">
                   <h2 className="font-medium leading-snug">{book.title}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {book.author}
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-teal-800">
+                    {book.availableCopies > 0
+                      ? `${book.availableCopies} available to borrow`
+                      : "Currently checked out"}
                   </p>
                   {book.addedAt ? (
                     <p className="mt-1 text-xs text-muted-foreground/80">

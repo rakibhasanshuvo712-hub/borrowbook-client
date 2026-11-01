@@ -29,6 +29,20 @@ function RequiredMark() {
   )
 }
 
+function normalizeImageSource(value: string): string | null {
+  const source = value.trim()
+  if (!source) return null
+  if (source.startsWith("/") && !source.startsWith("//")) return source
+
+  try {
+    const url = new URL(source)
+    return url.protocol === "http:" || url.protocol === "https:" ? source : null
+  } catch {
+    // While someone is typing, the value may not yet be a complete URL.
+    return null
+  }
+}
+
 export function AddBookForm() {
   const { user, token } = useAuth()
   const formRef = React.useRef<HTMLFormElement>(null)
@@ -65,11 +79,12 @@ export function AddBookForm() {
 
     setSubmitting(true)
     try {
-      if (!image) {
+      const imageSource = normalizeImageSource(image)
+      if (!imageSource) {
         toast.add({
           type: "error",
-          title: "Cover image required",
-          description: "Upload a cover or paste an image URL first.",
+          title: "Valid cover image required",
+          description: "Enter an http(s) image URL or a local path such as /covers/cover-teal.svg.",
         })
         return
       }
@@ -79,7 +94,7 @@ export function AddBookForm() {
           title,
           author,
           category,
-          image,
+          image: imageSource,
           description,
           bookNumber,
           totalCopies,
@@ -111,8 +126,7 @@ export function AddBookForm() {
     }
   }
 
-  const previewSrc = preview.trim()
-  const showPreview = previewSrc !== "" && !previewFailed
+  const previewSrc = normalizeImageSource(preview)
 
   return (
     <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_12%_18%,_var(--tw-gradient-stops))] from-amber-100/70 via-transparent to-fuchsia-100/60 px-4 py-10 sm:px-6">
@@ -204,7 +218,7 @@ export function AddBookForm() {
               </Label>
               <div className="flex items-center gap-3">
                 <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:size-20">
-                  {showPreview ? (
+                  {previewSrc && !previewFailed ? (
                     <Image
                       src={previewSrc}
                       alt="Cover preview"
@@ -223,11 +237,11 @@ export function AddBookForm() {
                 <Input
                   id="book-image"
                   name="image"
-                  type="url"
+                  type="text"
                   required
                   autoComplete="off"
                   className="min-w-0 flex-1"
-                  placeholder="https://… or /covers/my-book.svg"
+                  placeholder="https://example.com/cover.jpg or /covers/cover-teal.svg"
                   onChange={(event) => {
                     setPreview(event.target.value)
                     setPreviewFailed(false)

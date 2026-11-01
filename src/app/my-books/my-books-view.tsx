@@ -61,7 +61,8 @@ export function MyBooksView() {
     setBooks(null)
     try {
       const all = await fetchBooks()
-      setBooks(all.filter((book) => book.userEmail === user?.email))
+      // The signed-in community can manage the shared catalog.
+      setBooks(all)
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Something went wrong."
@@ -72,7 +73,7 @@ export function MyBooksView() {
         description: message,
       })
     }
-  }, [user?.email])
+  }, [])
 
   React.useEffect(() => {
     if (requested.current) return
@@ -87,13 +88,25 @@ export function MyBooksView() {
     const form = new FormData(event.currentTarget)
     const data = Object.fromEntries(form.entries())
 
-    const payload: Record<string, string> = {
+    const payload: Record<string, string | number> = {
       title: String(data.title ?? "").trim(),
       author: String(data.author ?? "").trim(),
       category: String(data.category ?? CATEGORIES[0]),
       description: String(data.description ?? "").trim(),
       bookNumber: String(data.bookNumber ?? "").trim(),
     }
+    const totalCopies = Math.max(1, Math.floor(Number(data.totalCopies) || 1))
+    const borrowedCopies = Math.max(0, editing.totalCopies - editing.availableCopies)
+    if (totalCopies < borrowedCopies) {
+      toast.add({
+        type: "error",
+        title: "Total copies is too low",
+        description: `There are already ${borrowedCopies} copies checked out. Set total copies to at least ${borrowedCopies}.`,
+      })
+      return
+    }
+    payload.totalCopies = totalCopies
+    payload.availableCopies = Math.max(0, totalCopies - borrowedCopies)
 
     if (!payload.title || !payload.author || !payload.description) {
       toast.add({
@@ -149,7 +162,7 @@ export function MyBooksView() {
       toast.add({
         type: "success",
         title: "Book deleted",
-        description: `“${deleting.title}” has been removed from your shelf.`,
+        description: `“${deleting.title}” has been removed from the catalog.`,
       })
       setDeleting(null)
     } catch (err: unknown) {
@@ -173,8 +186,8 @@ export function MyBooksView() {
           </span>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">My Books</h1>
           <p className="mt-2 text-sm leading-relaxed text-foreground/70 sm:text-base">
-            Welcome{user?.name ? `, ${user.name.split(" ")[0]}` : ""}. Keep your
-            shared books up to date from one place.
+            Welcome{user?.name ? `, ${user.name.split(" ")[0]}` : ""}. Manage
+            books shared by the whole community from one place.
           </p>
         </div>
         <Link
@@ -247,8 +260,8 @@ export function MyBooksView() {
           </span>
           <h2 className="mt-4 text-lg font-semibold">Your shelf is ready for a story</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Add a book to share it with the community. You can edit its details
-            or remove it any time.
+            There are no books in the community catalog yet. Add the first one
+            and invite readers to borrow it.
           </p>
           <Link
             href="/add-book"
@@ -349,6 +362,22 @@ export function MyBooksView() {
                     placeholder="ISBN, shelf or inventory number"
                     defaultValue={editing.bookNumber}
                   />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-total-copies">Total Copies</Label>
+                  <Input
+                    id="edit-total-copies"
+                    name="totalCopies"
+                    type="number"
+                    min={1}
+                    step={1}
+                    required
+                    defaultValue={editing.totalCopies}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Copies currently borrowed stay checked out.
+                  </p>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">

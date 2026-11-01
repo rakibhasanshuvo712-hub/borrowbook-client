@@ -11,7 +11,6 @@ import {
   deleteBook,
   fetchBook,
   fetchBorrows,
-  setAvailableCopies,
   updateBook,
   type Book,
 } from "@/lib/api"
@@ -80,7 +79,7 @@ export function BookDetailsView({ id }: { id: string }) {
       })
   }, [id])
 
-  const isOwner = !!book && !!user && book.userEmail === user.email
+  const canManageBooks = !!user && !!token
 
   async function handleEdit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -99,9 +98,18 @@ export function BookDetailsView({ id }: { id: string }) {
 
     const totalCopies = Math.max(1, Math.floor(Number(data.totalCopies) || 1))
     payload.totalCopies = totalCopies
-    // Keep available copies within the new total when the owner restocks.
+    // Keep the checked-out count intact when changing the total stock.
     if (book) {
-      payload.availableCopies = Math.min(totalCopies, Math.max(0, book.availableCopies))
+      const borrowedCopies = Math.max(0, book.totalCopies - book.availableCopies)
+      if (totalCopies < borrowedCopies) {
+        toast.add({
+          type: "error",
+          title: "Total copies is too low",
+          description: `There are already ${borrowedCopies} copies checked out. Set total copies to at least ${borrowedCopies}.`,
+        })
+        return
+      }
+      payload.availableCopies = Math.max(0, totalCopies - borrowedCopies)
     }
 
     if (!payload.title || !payload.author || !payload.description) {
@@ -218,13 +226,14 @@ export function BookDetailsView({ id }: { id: string }) {
         token
       )
 
-      // Challenge: decrement available copies by 1 when a book is borrowed.
-      const nextCopies = Math.max(0, book.availableCopies - 1)
+      // The backend atomically decrements stock when it creates the loan.
+      // Refresh from the server so the displayed count is authoritative.
+      let nextCopies = Math.max(0, book.availableCopies - 1)
       try {
-        await setAvailableCopies(book._id, nextCopies, token)
+        const updatedBook = await fetchBook(book._id)
+        nextCopies = updatedBook.availableCopies
       } catch {
-        // The borrow itself succeeded; a failed stock sync should not flip
-        // a successful loan into an error. The UI updates optimistically.
+        // The borrow succeeded; preserve an optimistic count if refresh fails.
       }
       setBook((prev) =>
         prev ? { ...prev, availableCopies: nextCopies } : prev
@@ -361,11 +370,15 @@ export function BookDetailsView({ id }: { id: string }) {
                   <Button
                     size="lg"
                     className="w-full sm:w-auto"
-                    disabled={book.availableCopies <= 0}
+                    disabled={!user || !token || book.availableCopies <= 0}
                   />
                 }
               >
-                {book.availableCopies <= 0 ? "Not Available" : "Borrow This Book"}
+                {!user || !token
+                  ? "Log in to borrow"
+                  : book.availableCopies <= 0
+                    ? "Not Available"
+                    : "Borrow This Book"}
               </DialogTrigger>
 
               <DialogContent className="sm:max-w-md">
@@ -435,8 +448,8 @@ export function BookDetailsView({ id }: { id: string }) {
               </DialogContent>
             </Dialog>
 
-            {/* Edit / Delete — only the book's owner can manage it from here. */}
-            {isOwner ? (
+            {/* Any signed-in member can manage books in the shared catalog. */}
+            {canManageBooks ? (
               <>
                 <Dialog open={editOpen} onOpenChange={setEditOpen}>
                   <DialogTrigger
