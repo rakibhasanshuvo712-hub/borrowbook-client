@@ -3,7 +3,13 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { PencilIcon, Trash2Icon } from "lucide-react"
+import {
+  BookOpenCheckIcon,
+  BookPlusIcon,
+  PencilIcon,
+  SparklesIcon,
+  Trash2Icon,
+} from "lucide-react"
 import {
   CATEGORIES,
   deleteBook,
@@ -160,21 +166,62 @@ export function MyBooksView() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      <div className="account-banner mb-7 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-teal-800">Your little library</p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">My Books</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            The books you have added — edit the details or remove them.
+      <header className="account-banner mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div className="relative max-w-2xl">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-900/10">
+            <SparklesIcon className="size-3.5" /> Your personal shelf
+          </span>
+          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">My Books</h1>
+          <p className="mt-2 text-sm leading-relaxed text-foreground/70 sm:text-base">
+            Welcome{user?.name ? `, ${user.name.split(" ")[0]}` : ""}. Keep your
+            shared books up to date from one place.
           </p>
         </div>
         <Link
           href="/add-book"
-          className="inline-flex h-10 items-center rounded-xl bg-teal-800 px-4 text-sm font-semibold text-white shadow-lg shadow-teal-950/15 transition-all hover:-translate-y-0.5 hover:bg-teal-700"
+          className="relative inline-flex h-11 items-center gap-2 rounded-xl bg-teal-800 px-5 text-sm font-semibold text-white shadow-lg shadow-teal-950/15 transition-all hover:-translate-y-0.5 hover:bg-teal-700"
         >
-          Add Book
+          <BookPlusIcon className="size-4" /> Add a book
         </Link>
-      </div>
+      </header>
+
+      {books !== null && !error ? (
+        <section aria-label="Your shelf summary" className="mb-8 grid gap-4 sm:grid-cols-3">
+          <div className="flex items-center gap-4 rounded-2xl border border-teal-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-teal-100 text-teal-800">
+              <BookOpenCheckIcon className="size-5" />
+            </span>
+            <div>
+              <p className="text-2xl font-semibold tracking-tight">{books.length}</p>
+              <p className="text-sm text-muted-foreground">
+                {books.length === 1 ? "Book on your shelf" : "Books on your shelf"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 rounded-2xl border border-amber-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-amber-100 text-amber-800">
+              <SparklesIcon className="size-5" />
+            </span>
+            <div>
+              <p className="text-2xl font-semibold tracking-tight">
+                {new Set(books.map((book) => book.category)).size}
+              </p>
+              <p className="text-sm text-muted-foreground">Genres represented</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 rounded-2xl border border-fuchsia-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-800">
+              <BookPlusIcon className="size-5" />
+            </span>
+            <div>
+              <p className="text-2xl font-semibold tracking-tight">
+                {books.reduce((total, book) => total + book.availableCopies, 0)}
+              </p>
+              <p className="text-sm text-muted-foreground">Copies available to borrow</p>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {books === null ? (
         error ? (
@@ -194,15 +241,22 @@ export function MyBooksView() {
           </div>
         )
       ) : books.length === 0 ? (
-        <p className="mt-12 text-center text-sm text-muted-foreground">
-          You have not added any books yet.{" "}
+        <div className="mx-auto mt-10 max-w-lg rounded-3xl border border-dashed border-teal-900/20 bg-white/55 px-6 py-12 text-center shadow-sm">
+          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-teal-100 text-teal-800">
+            <BookOpenCheckIcon className="size-7" />
+          </span>
+          <h2 className="mt-4 text-lg font-semibold">Your shelf is ready for a story</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            Add a book to share it with the community. You can edit its details
+            or remove it any time.
+          </p>
           <Link
             href="/add-book"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
+            className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-teal-800 px-4 text-sm font-semibold text-white shadow-md shadow-teal-950/10 transition hover:bg-teal-700"
           >
-            Add your first book
+            <BookPlusIcon className="size-4" /> Add your first book
           </Link>
-        </p>
+        </div>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {books.map((book) => (
