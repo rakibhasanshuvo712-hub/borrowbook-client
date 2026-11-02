@@ -130,9 +130,9 @@ export function BooksGrid() {
                     <Link
                       href={`/books/${book._id}`}
                       className={buttonVariants({
-                        variant: "outline",
+                        variant: "default",
                         size: "sm",
-                        className: "w-full",
+                        className: "w-full bg-[#1f5960] text-white shadow-md shadow-[#1f5960]/20 hover:bg-[#17464d] hover:text-white",
                       })}
                     >
                       View Details

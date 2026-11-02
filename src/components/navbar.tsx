@@ -42,7 +42,7 @@ const LOGIN_CLASS = buttonVariants({
 const REGISTER_CLASS = buttonVariants({
   variant: "default",
   size: "sm",
-  className: "bg-amber-300 text-teal-950 shadow-sm shadow-black/10 hover:bg-amber-200",
+  className: "bg-[#d69b64] text-[#1b3033] shadow-md shadow-black/15 hover:bg-[#e4b27e]",
 })
 
 function isActive(pathname: string | null, href: string) {
