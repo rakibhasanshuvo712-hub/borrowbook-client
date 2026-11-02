@@ -12,7 +12,6 @@ import {
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { useAuth, type User } from "@/lib/auth-context"
-import { getInitials } from "@/lib/utils"
 import { RequireAuth } from "@/components/require-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -81,9 +80,9 @@ function ProfileCard({ user, onEdit }: { user: User; onEdit: () => void }) {
           <div className="relative mx-auto sm:mx-0">
             <div aria-hidden="true" className="absolute -inset-1 rounded-full bg-gradient-to-br from-[#d8b77c] to-[#28666a] opacity-80 blur-[1px]" />
             <Avatar className="relative size-24 border-4 border-card shadow-lg sm:size-28">
-              <AvatarImage src={user.photo} alt={`${user.name}'s profile photo`} />
+              <AvatarImage src={user.photo || undefined} alt={`${user.name}'s profile photo`} />
               <AvatarFallback className="bg-[#244c52] text-2xl font-semibold text-[#f0d49e]">
-                {getInitials(user.name)}
+                <UserRoundIcon aria-hidden="true" className="size-12" />
               </AvatarFallback>
             </Avatar>
           </div>
@@ -228,7 +227,7 @@ function EditProfileForm({
             <Avatar className="size-20 border-4 border-card shadow-md">
               <AvatarImage src={photo || undefined} alt={name || "Profile photo preview"} />
               <AvatarFallback className="bg-[#244c52] text-lg font-semibold text-[#f0d49e]">
-                {getInitials(name)}
+                <UserRoundIcon aria-hidden="true" className="size-9" />
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 text-center sm:text-left">

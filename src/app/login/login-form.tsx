@@ -32,20 +32,9 @@ export function LoginForm() {
   const router = useRouter()
   const [submitting, setSubmitting] = React.useState(false)
 
-  function destination() {
-    const requested = new URLSearchParams(window.location.search).get("next")
-    return requested?.startsWith("/") && !requested.startsWith("//")
-      ? requested
-      : "/"
-  }
-
   React.useEffect(() => {
     if (user) {
-      const requested = new URLSearchParams(window.location.search).get("next")
-      const next = requested?.startsWith("/") && !requested.startsWith("//")
-        ? requested
-        : "/"
-      router.replace(next)
+      router.replace("/")
     }
   }, [user, router])
 
@@ -94,7 +83,7 @@ export function LoginForm() {
         title: "Signed in",
         description: `Welcome back, ${data?.user.name || email}!`,
       })
-      router.push(destination())
+      router.replace("/")
     } catch (error: unknown) {
       toast.add({
         type: "error",

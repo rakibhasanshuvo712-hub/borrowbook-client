@@ -94,7 +94,7 @@ export function RegisterForm() {
         title: "Account created",
         description: `Welcome to BookNook, ${result.user.name}!`,
       })
-      router.push("/")
+      router.replace("/")
     } finally {
       setSubmitting(false)
     }

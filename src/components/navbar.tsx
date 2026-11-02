@@ -3,9 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LogOutIcon, UserIcon } from "lucide-react"
+import { LogOutIcon, UserIcon, UserRoundIcon } from "lucide-react"
 import { cn } from "cn"
-import { getInitials } from "@/lib/utils"
 import { useAuth, type User } from "@/lib/auth-context"
 import { Logo } from "@/components/logo"
 import { buttonVariants } from "@/components/ui/button"
@@ -158,8 +157,10 @@ function UserMenu({
         className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <Avatar>
-          <AvatarImage src={user.photo} alt={user.name} />
-          <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+          <AvatarImage src={user.photo || undefined} alt={user.name} />
+          <AvatarFallback className="bg-[#244c52] text-[#f0d49e]">
+            <UserRoundIcon aria-hidden="true" className="size-4" />
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
