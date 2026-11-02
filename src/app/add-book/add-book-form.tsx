@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { BookOpenIcon } from "lucide-react"
 import { CATEGORIES, createBook } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
@@ -45,6 +46,7 @@ function normalizeImageSource(value: string): string | null {
 
 export function AddBookForm() {
   const { user, token } = useAuth()
+  const router = useRouter()
   const formRef = React.useRef<HTMLFormElement>(null)
   const [submitting, setSubmitting] = React.useState(false)
   const [preview, setPreview] = React.useState("")
@@ -114,6 +116,7 @@ export function AddBookForm() {
       formEl.reset()
       setPreview("")
       setPreviewFailed(false)
+      router.push("/my-books")
     } catch (error: unknown) {
       toast.add({
         type: "error",

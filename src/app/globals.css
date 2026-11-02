@@ -49,38 +49,38 @@
 }
 
 :root {
-  --background: oklch(0.955 0.045 97);
-  --foreground: oklch(0.24 0.045 190);
-  --card: oklch(0.995 0.012 96);
-  --card-foreground: oklch(0.24 0.045 190);
-  --popover: oklch(0.995 0.009 96);
-  --popover-foreground: oklch(0.24 0.045 190);
-  --primary: oklch(0.53 0.12 184);
-  --primary-foreground: oklch(0.99 0.01 96);
-  --secondary: oklch(0.91 0.075 91);
-  --secondary-foreground: oklch(0.31 0.07 177);
-  --muted: oklch(0.94 0.025 95);
-  --muted-foreground: oklch(0.48 0.035 190);
-  --accent: oklch(0.88 0.11 48);
-  --accent-foreground: oklch(0.31 0.07 177);
+  --background: oklch(0.96 0.018 78);
+  --foreground: oklch(0.23 0.035 220);
+  --card: oklch(0.99 0.012 78);
+  --card-foreground: oklch(0.23 0.035 220);
+  --popover: oklch(0.99 0.012 78);
+  --popover-foreground: oklch(0.23 0.035 220);
+  --primary: oklch(0.46 0.105 204);
+  --primary-foreground: oklch(0.98 0.015 78);
+  --secondary: oklch(0.9 0.045 74);
+  --secondary-foreground: oklch(0.29 0.045 215);
+  --muted: oklch(0.93 0.018 78);
+  --muted-foreground: oklch(0.48 0.025 218);
+  --accent: oklch(0.79 0.105 58);
+  --accent-foreground: oklch(0.26 0.035 220);
   --destructive: oklch(0.58 0.2 27);
-  --border: oklch(0.86 0.035 94);
-  --input: oklch(0.86 0.035 94);
-  --ring: oklch(0.62 0.13 184);
+  --border: oklch(0.86 0.025 78);
+  --input: oklch(0.86 0.025 78);
+  --ring: oklch(0.58 0.11 204);
   --chart-1: oklch(0.68 0.17 36);
   --chart-2: oklch(0.58 0.13 184);
   --chart-3: oklch(0.61 0.15 306);
   --chart-4: oklch(0.78 0.14 92);
   --chart-5: oklch(0.6 0.17 15);
   --radius: 0.625rem;
-  --sidebar: oklch(0.97 0.025 97);
-  --sidebar-foreground: oklch(0.24 0.045 190);
-  --sidebar-primary: oklch(0.53 0.12 184);
-  --sidebar-primary-foreground: oklch(0.99 0.01 96);
-  --sidebar-accent: oklch(0.91 0.075 91);
-  --sidebar-accent-foreground: oklch(0.31 0.07 177);
-  --sidebar-border: oklch(0.86 0.035 94);
-  --sidebar-ring: oklch(0.62 0.13 184);
+  --sidebar: oklch(0.97 0.018 78);
+  --sidebar-foreground: oklch(0.23 0.035 220);
+  --sidebar-primary: oklch(0.46 0.105 204);
+  --sidebar-primary-foreground: oklch(0.98 0.015 78);
+  --sidebar-accent: oklch(0.9 0.045 74);
+  --sidebar-accent-foreground: oklch(0.29 0.045 215);
+  --sidebar-border: oklch(0.86 0.025 78);
+  --sidebar-ring: oklch(0.58 0.11 204);
 }
 
 .dark {
@@ -124,11 +124,10 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse at 7% 0%, oklch(0.88 0.16 88 / 0.52), transparent 34rem),
-      radial-gradient(ellipse at 94% 20%, oklch(0.86 0.14 326 / 0.3), transparent 34rem),
-      radial-gradient(ellipse at 7% 58%, oklch(0.86 0.13 190 / 0.28), transparent 32rem),
-      radial-gradient(ellipse at 92% 86%, oklch(0.88 0.14 48 / 0.35), transparent 34rem),
-      linear-gradient(135deg, oklch(0.96 0.04 97), oklch(0.965 0.035 180) 52%, oklch(0.955 0.05 324));
+      radial-gradient(ellipse at 7% 0%, oklch(0.87 0.09 67 / 0.32), transparent 34rem),
+      radial-gradient(ellipse at 94% 20%, oklch(0.88 0.055 35 / 0.25), transparent 34rem),
+      radial-gradient(ellipse at 7% 58%, oklch(0.87 0.07 205 / 0.2), transparent 32rem),
+      linear-gradient(135deg, oklch(0.97 0.02 78), oklch(0.955 0.025 165) 52%, oklch(0.965 0.02 50));
     background-attachment: fixed;
   }
   [data-slot="card"] {
@@ -146,9 +145,9 @@
   }
   .book-card {
     position: relative;
-    border: 1px solid oklch(0.73 0.075 88 / 0.5);
+    border: 1px solid oklch(0.75 0.05 68 / 0.48);
     border-radius: 1.2rem;
-    background: linear-gradient(155deg, oklch(0.995 0.009 96), oklch(0.965 0.035 91 / 0.78));
+    background: linear-gradient(155deg, oklch(0.995 0.012 78), oklch(0.96 0.035 74 / 0.78));
     box-shadow: 0 16px 38px -30px oklch(0.24 0.045 190 / 0.6);
     transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
   }

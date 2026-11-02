@@ -12,22 +12,22 @@ const slides = [
     eyebrow: "Welcome to BookNook",
     title: "A thousand stories, one quiet shelf",
     text: "Discover, borrow, and share books with a community that reads as eagerly as you do.",
-    bg: "from-emerald-100 via-teal-50 to-sky-100",
-    accent: "text-emerald-800",
+    bg: "from-[#14252e] via-[#203b45] to-[#5c4236]",
+    accent: "text-[#e3b67b]",
   },
   {
     eyebrow: "Fresh off the press",
     title: "New arrivals every single week",
     text: "From buzzy debuts to long-awaited sequels, the newest titles land on our shelves first.",
-    bg: "from-indigo-100 via-violet-50 to-purple-100",
-    accent: "text-indigo-800",
+    bg: "from-[#28243a] via-[#48344c] to-[#9b5f5c]",
+    accent: "text-[#f0c48f]",
   },
   {
     eyebrow: "Borrow. Read. Return.",
     title: "Your next favourite is one click away",
     text: "Reserve a book in seconds, pick it up at your convenience, and return it whenever you are done.",
-    bg: "from-amber-100 via-orange-50 to-rose-100",
-    accent: "text-amber-800",
+    bg: "from-[#163c37] via-[#28665b] to-[#b77c4d]",
+    accent: "text-[#f4d6a5]",
   },
 ]
 
@@ -37,39 +37,39 @@ function SlideContent({ slide }: { slide: Slide }) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gradient-to-br px-6 py-14 sm:px-12 sm:py-20",
+        "relative min-h-[390px] overflow-hidden bg-gradient-to-br px-6 py-14 text-white sm:min-h-[450px] sm:px-12 sm:py-20 md:px-16",
         slide.bg
       )}
     >
       <BookOpenIcon
         aria-hidden="true"
         className={cn(
-          "absolute -top-8 -right-6 size-40 rotate-12 opacity-10 sm:size-56",
+          "absolute -top-8 -right-6 size-40 rotate-12 opacity-[0.16] sm:right-10 sm:top-8 sm:size-72",
           slide.accent
         )}
       />
       <div
         aria-hidden="true"
-        className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-white/40 blur-2xl"
+        className="absolute -right-8 -bottom-32 size-80 rounded-full border-[36px] border-white/10 blur-[1px] sm:right-20 sm:size-[28rem]"
       />
       <div className="relative max-w-2xl">
         <span
           className={cn(
-            "inline-flex items-center rounded-full border border-black/5 bg-background/70 px-3 py-1 text-xs font-medium",
+            "inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide backdrop-blur",
             slide.accent
           )}
         >
           {slide.eyebrow}
         </span>
-        <h2 className="mt-4 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl md:text-5xl">
+        <h2 className="mt-5 max-w-2xl text-4xl leading-[1.06] font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
           {slide.title}
         </h2>
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground/75 sm:text-base">
+        <p className="mt-5 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">
           {slide.text}
         </p>
         <Link
           href="/books"
-          className={cn(buttonVariants({ size: "lg" }), "mt-7")}
+          className={cn(buttonVariants({ size: "lg" }), "mt-8 bg-[#e3b67b] text-[#17272b] shadow-lg shadow-black/20 hover:bg-[#f0c991]")}
         >
           Browse Books
           <ArrowRightIcon />
@@ -83,7 +83,7 @@ export function HeroSlider() {
   return (
     <section
       aria-label="Featured collections"
-      className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6"
+      className="mx-auto w-full max-w-7xl px-4 pt-7 sm:px-6"
     >
       <div className="hero-slider relative">
         <Swiper
@@ -92,7 +92,7 @@ export function HeroSlider() {
           pagination={{ clickable: true }}
           navigation
           loop
-          className="overflow-hidden rounded-2xl ring-1 ring-foreground/10"
+          className="overflow-hidden rounded-[2rem] shadow-[0_30px_80px_-35px_rgba(20,37,46,0.62)] ring-1 ring-white/30"
         >
           {slides.map((slide) => (
             <SwiperSlide key={slide.title}>
@@ -115,9 +115,9 @@ export function HeroFallback() {
   return (
     <section
       aria-label="Featured collections"
-      className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6"
+      className="mx-auto w-full max-w-7xl px-4 pt-7 sm:px-6"
     >
-      <div className="overflow-hidden rounded-2xl ring-1 ring-foreground/10">
+      <div className="overflow-hidden rounded-[2rem] shadow-[0_30px_80px_-35px_rgba(20,37,46,0.62)] ring-1 ring-white/30">
         <SlideContent slide={slides[0]} />
       </div>
     </section>

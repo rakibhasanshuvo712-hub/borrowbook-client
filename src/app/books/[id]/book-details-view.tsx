@@ -79,7 +79,10 @@ export function BookDetailsView({ id }: { id: string }) {
       })
   }, [id])
 
-  const canManageBooks = !!user && !!token
+  const canManageBooks =
+    !!user &&
+    !!token &&
+    user.email.trim().toLowerCase() === book?.userEmail.trim().toLowerCase()
 
   async function handleEdit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -134,6 +137,7 @@ export function BookDetailsView({ id }: { id: string }) {
         description: `“${payload.title}” has been saved.`,
       })
       setEditOpen(false)
+      router.push("/books")
     } catch (err: unknown) {
       toast.add({
         type: "error",
@@ -245,6 +249,7 @@ export function BookDetailsView({ id }: { id: string }) {
         description: `“${book.title}” is yours until ${formatDate(chosenReturnDate)}. Find it under My Borrows.`,
       })
       setBorrowOpen(false)
+      router.push("/my-borrows")
     } catch (err: unknown) {
       toast.add({
         type: "error",
@@ -448,7 +453,7 @@ export function BookDetailsView({ id }: { id: string }) {
               </DialogContent>
             </Dialog>
 
-            {/* Any signed-in member can manage books in the shared catalog. */}
+            {/* Only the member who added this book can manage it. */}
             {canManageBooks ? (
               <>
                 <Dialog open={editOpen} onOpenChange={setEditOpen}>

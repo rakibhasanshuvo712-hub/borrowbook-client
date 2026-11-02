@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   BookOpenCheckIcon,
   BookPlusIcon,
@@ -47,6 +48,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 export function MyBooksView() {
   const { user, token } = useAuth()
+  const router = useRouter()
   const [books, setBooks] = React.useState<Book[] | null>(null)
   const [error, setError] = React.useState<string | null>(null)
   const requested = React.useRef(false)
@@ -61,8 +63,12 @@ export function MyBooksView() {
     setBooks(null)
     try {
       const all = await fetchBooks()
-      // The signed-in community can manage the shared catalog.
-      setBooks(all)
+      const ownerEmail = user?.email.trim().toLowerCase()
+      setBooks(
+        all.filter(
+          (book) => book.userEmail.trim().toLowerCase() === ownerEmail
+        )
+      )
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Something went wrong."
@@ -73,7 +79,7 @@ export function MyBooksView() {
         description: message,
       })
     }
-  }, [])
+  }, [user?.email])
 
   React.useEffect(() => {
     if (requested.current) return
@@ -138,6 +144,7 @@ export function MyBooksView() {
         description: `“${payload.title}” has been saved.`,
       })
       setEditing(null)
+      router.push("/books")
     } catch (err: unknown) {
       toast.add({
         type: "error",
@@ -165,6 +172,7 @@ export function MyBooksView() {
         description: `“${deleting.title}” has been removed from the catalog.`,
       })
       setDeleting(null)
+      router.push("/books")
     } catch (err: unknown) {
       toast.add({
         type: "error",
@@ -187,7 +195,7 @@ export function MyBooksView() {
           <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">My Books</h1>
           <p className="mt-2 text-sm leading-relaxed text-foreground/70 sm:text-base">
             Welcome{user?.name ? `, ${user.name.split(" ")[0]}` : ""}. Manage
-            books shared by the whole community from one place.
+            the books you added from one place.
           </p>
         </div>
         <Link
@@ -260,8 +268,8 @@ export function MyBooksView() {
           </span>
           <h2 className="mt-4 text-lg font-semibold">Your shelf is ready for a story</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            There are no books in the community catalog yet. Add the first one
-            and invite readers to borrow it.
+            You have not added any books yet. Add your first one and invite
+            readers to borrow it.
           </p>
           <Link
             href="/add-book"
