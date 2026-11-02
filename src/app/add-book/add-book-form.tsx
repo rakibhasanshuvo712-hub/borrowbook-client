@@ -4,6 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 import { BookOpenIcon } from "lucide-react"
 import { CATEGORIES, createBook } from "@/lib/api"
 import { useAuth } from "@/lib/auth-context"
@@ -68,13 +69,22 @@ export function AddBookForm() {
     const category = String(data.category ?? CATEGORIES[0])
     const image = String(data.image ?? "").trim()
     const bookNumber = String(data.bookNumber ?? "").trim()
-    const totalCopies = Math.max(1, Math.floor(Number(data.totalCopies) || 1))
+    const totalCopies = Number(data.totalCopies)
 
     if (!title || !author || !description) {
       toast.add({
         type: "error",
         title: "Missing details",
         description: "Title, author and description are all required.",
+      })
+      return
+    }
+
+    if (!Number.isInteger(totalCopies) || totalCopies < 1) {
+      toast.add({
+        type: "error",
+        title: "Invalid copy count",
+        description: "Enter a whole number of copies, starting at 1.",
       })
       return
     }
@@ -133,7 +143,13 @@ export function AddBookForm() {
 
   return (
     <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_12%_18%,_var(--tw-gradient-stops))] from-amber-100/70 via-transparent to-fuchsia-100/60 px-4 py-10 sm:px-6">
-      <Card className="w-full max-w-2xl">
+      <motion.div
+        className="w-full max-w-2xl"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+      >
+      <Card className="w-full">
         <CardHeader className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-100 px-6 py-6 sm:px-8">
           <CardTitle className="text-xl font-semibold">Add a New Book</CardTitle>
           <CardDescription className="text-foreground/70">
@@ -180,7 +196,7 @@ export function AddBookForm() {
                 defaultValue={1}
                 required
                 autoComplete="off"
-                placeholder="How many copies can be borrowed at once?"
+                placeholder="Number of copies available to lend"
               />
             </div>
 
@@ -315,6 +331,7 @@ export function AddBookForm() {
           </p>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   )
 }

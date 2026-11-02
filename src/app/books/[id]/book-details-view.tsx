@@ -379,10 +379,10 @@ export function BookDetailsView({ id }: { id: string }) {
                   />
                 }
               >
-                {!user || !token
-                  ? "Log in to borrow"
-                  : book.availableCopies <= 0
-                    ? "Not Available"
+                {book.availableCopies <= 0
+                  ? "Not Available"
+                  : !user || !token
+                    ? "Log in to borrow"
                     : "Borrow This Book"}
               </DialogTrigger>
 

@@ -119,7 +119,7 @@ export function BooksGrid() {
                   <p className="mt-2 text-sm font-medium text-teal-800">
                     {book.availableCopies > 0
                       ? `${book.availableCopies} available to borrow`
-                      : "Currently checked out"}
+                      : "Not Available"}
                   </p>
                   {book.addedAt ? (
                     <p className="mt-1 text-xs text-muted-foreground/80">
