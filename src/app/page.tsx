@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { HeroSlider, HeroFallback } from "@/components/hero-slider"
 import { NewArrivals } from "@/components/new-arrivals"
 import { SectionHeading } from "@/components/section-heading"
+import { Reveal } from "@/components/reveal"
 
 const steps = [
   {
@@ -83,8 +84,11 @@ export default function HomePage() {
         <HeroSlider />
       </Suspense>
 
-      <NewArrivals />
+      <Reveal className="w-full">
+        <NewArrivals />
+      </Reveal>
 
+      <Reveal className="w-full">
       <section aria-labelledby="how-it-works-heading" className="shelf-panel">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
           <SectionHeading
@@ -118,7 +122,9 @@ export default function HomePage() {
           </ol>
         </div>
       </section>
+      </Reveal>
 
+      <Reveal className="w-full">
       <section aria-labelledby="reviews-heading">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
           <SectionHeading
@@ -152,6 +158,7 @@ export default function HomePage() {
           </ul>
         </div>
       </section>
+      </Reveal>
     </div>
   )
 }

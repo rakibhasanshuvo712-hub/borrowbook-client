@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { motion, useReducedMotion } from "framer-motion"
 import { ArrowRightIcon } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -23,6 +24,7 @@ export function NewArrivals() {
   const [books, setBooks] = React.useState<Book[] | null>(null)
   const [failed, setFailed] = React.useState(false)
   const requested = React.useRef(false)
+  const reduceMotion = useReducedMotion()
 
   React.useEffect(() => {
     // Strict Mode mounts effects twice in dev; one request, one toast.
@@ -69,8 +71,15 @@ export function NewArrivals() {
         </p>
       ) : (
         <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {books.map((book) => (
-            <li key={book._id} className="h-full">
+          {books.map((book, index) => (
+            <motion.li
+              key={book._id}
+              className="h-full"
+              initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+              whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.4, delay: index * 0.07 }}
+            >
               <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow duration-200 hover:shadow-md">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
                   <Image
@@ -109,7 +118,7 @@ export function NewArrivals() {
                   </div>
                 </div>
               </article>
-            </li>
+            </motion.li>
           ))}
         </ul>
       )}
