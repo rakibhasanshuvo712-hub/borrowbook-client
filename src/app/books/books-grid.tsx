@@ -49,18 +49,18 @@ export function BooksGrid() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      <header className="relative mb-9 flex items-center justify-between gap-6 overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-orange-50 to-fuchsia-100 px-6 py-8 ring-1 ring-white/80 sm:px-9 sm:py-10">
+      <header className="relative mb-7 flex items-center justify-between gap-4 overflow-hidden rounded-3xl bg-gradient-to-r from-[#f0e4cd] via-[#edf4ef] to-[#ead8c6] px-5 py-6 ring-1 ring-white/80 sm:mb-9 sm:gap-6 sm:px-9 sm:py-10">
         <div aria-hidden="true" className="absolute -right-8 -bottom-28 size-64 rounded-full border-[2rem] border-white/40" />
         <div className="relative">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/75 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-900/10">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#1f5960] ring-1 ring-[#1f5960]/10">
             <SparklesIcon className="size-3.5" /> The community shelf
           </span>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">All Books</h1>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:mt-4 sm:text-4xl">All Books</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-foreground/70 sm:text-base">
             Every title on our shelves. Find a story that feels like it was waiting for you.
           </p>
         </div>
-        <div className="relative hidden size-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-700 to-emerald-500 text-white shadow-xl shadow-teal-900/15 sm:flex">
+        <div className="relative hidden size-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-[#1f5960] to-[#bd8960] text-white shadow-xl shadow-[#193a42]/15 sm:flex">
           <BookOpenCheckIcon className="size-9" />
         </div>
       </header>

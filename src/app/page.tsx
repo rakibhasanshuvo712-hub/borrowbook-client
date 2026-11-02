@@ -65,7 +65,7 @@ const reviews = [
 const stepTones = [
   "bg-amber-200 text-amber-950",
   "bg-teal-200 text-teal-950",
-  "bg-fuchsia-200 text-fuchsia-950",
+  "bg-[#edcfaa] text-[#563c2b]",
   "bg-orange-200 text-orange-950",
 ]
 
@@ -132,7 +132,7 @@ export default function HomePage() {
                 key={review.name}
                 className="reader-card flex h-full flex-col rounded-2xl bg-card p-6 ring-1 ring-white/70"
               >
-                <QuoteIcon className={`size-5 ${["text-amber-600", "text-teal-700", "text-fuchsia-700"][index]}`} />
+                <QuoteIcon className={`size-5 ${["text-[#9a6a38]", "text-[#28666a]", "text-[#9b5e48]"][index]}`} />
                 <p className="mt-4 flex-1 text-sm leading-relaxed text-foreground/80">
                   {review.quote}
                 </p>

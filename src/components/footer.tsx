@@ -24,7 +24,7 @@ const contact = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-amber-300/25 bg-gradient-to-br from-teal-950 via-teal-900 to-violet-950 text-teal-50">
+    <footer className="relative overflow-hidden border-t border-[#d8b77c]/25 bg-gradient-to-br from-[#142d34] via-[#1f4b50] to-[#503c35] text-teal-50">
       <div aria-hidden="true" className="pointer-events-none absolute -top-32 right-8 size-72 rounded-full border-[1.5rem] border-white/[0.035]" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-20 size-80 rounded-full bg-emerald-400/10 blur-3xl" />
       <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2">

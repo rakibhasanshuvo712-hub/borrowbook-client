@@ -86,7 +86,7 @@ export function MyBorrowsView() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
       <header className="account-banner">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-violet-800">Out in the world</p>
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#1f5960]">Out in the world</p>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">My Borrows</h1>
         <p className="mt-2 max-w-xl text-sm text-foreground/70 sm:text-base">
           Your current reads, with their return dates all in one place.
@@ -121,7 +121,43 @@ export function MyBorrowsView() {
           </Link>
         </p>
       ) : (
-        <div className="mt-8 overflow-x-auto rounded-2xl bg-card/90 p-2 shadow-xl shadow-teal-950/5 ring-1 ring-white/80 backdrop-blur-sm sm:p-3">
+        <>
+        <ul className="mt-6 space-y-3 md:hidden">
+          {borrows.map((borrow) => (
+            <li key={borrow._id} className="rounded-2xl border border-foreground/10 bg-card/95 p-4 shadow-md shadow-[#193a42]/[0.06]">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-foreground/10">
+                  <Image
+                    src={borrow.bookImage}
+                    alt={`Cover of ${borrow.bookTitle}`}
+                    fill
+                    sizes="64px"
+                    unoptimized
+                    className="object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="break-words font-semibold leading-snug">{borrow.bookTitle}</h2>
+                  <p className="mt-2 text-xs text-muted-foreground">Borrowed {formatDate(borrow.borrowDate)}</p>
+                  <p className="mt-1 text-xs font-medium text-primary">Due {formatDate(borrow.returnDate)}</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                disabled={returningId !== null}
+                onClick={() => void handleReturn(borrow)}
+                className="mt-4 w-full border-primary/30 text-primary hover:bg-primary/10"
+              >
+                {returningId === borrow._id ? (
+                  <><Spinner /> Returning…</>
+                ) : (
+                  "Return Book"
+                )}
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8 hidden overflow-x-auto rounded-2xl bg-card/90 p-2 shadow-xl shadow-teal-950/5 ring-1 ring-white/80 backdrop-blur-sm md:block md:p-3">
           <Table className="min-w-[640px]">
             <TableHeader>
               <TableRow>
@@ -178,6 +214,7 @@ export function MyBorrowsView() {
             </TableBody>
           </Table>
         </div>
+        </>
       )}
     </div>
   )

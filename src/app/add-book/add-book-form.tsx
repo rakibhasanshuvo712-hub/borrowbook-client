@@ -142,7 +142,7 @@ export function AddBookForm() {
   const previewSrc = normalizeImageSource(preview)
 
   return (
-    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_12%_18%,_var(--tw-gradient-stops))] from-amber-100/70 via-transparent to-fuchsia-100/60 px-4 py-10 sm:px-6">
+    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_12%_18%,_var(--tw-gradient-stops))] from-[#ead9b7]/70 via-transparent to-[#dcece7]/80 px-3 py-7 sm:px-6 sm:py-10">
       <motion.div
         className="w-full max-w-2xl"
         initial={{ opacity: 0, y: 18 }}
@@ -150,7 +150,7 @@ export function AddBookForm() {
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
       <Card className="w-full">
-        <CardHeader className="bg-gradient-to-r from-amber-200 via-orange-100 to-rose-100 px-6 py-6 sm:px-8">
+        <CardHeader className="bg-gradient-to-r from-[#e8d5b1] via-[#e9eee4] to-[#d7e8e2] px-5 py-5 sm:px-8 sm:py-6">
           <CardTitle className="text-xl font-semibold">Add a New Book</CardTitle>
           <CardDescription className="text-foreground/70">
             Fill in the details to share a book with the BookNook community.

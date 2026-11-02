@@ -207,7 +207,7 @@ export function MyBooksView() {
       </header>
 
       {books !== null && !error ? (
-        <section aria-label="Your shelf summary" className="mb-8 grid gap-4 sm:grid-cols-3">
+        <section aria-label="Your shelf summary" className="mb-8 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           <div className="flex items-center gap-4 rounded-2xl border border-teal-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
             <span className="flex size-11 items-center justify-center rounded-xl bg-teal-100 text-teal-800">
               <BookOpenCheckIcon className="size-5" />
@@ -230,8 +230,8 @@ export function MyBooksView() {
               <p className="text-sm text-muted-foreground">Genres represented</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 rounded-2xl border border-fuchsia-900/10 bg-white/75 p-5 shadow-sm backdrop-blur">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-fuchsia-100 text-fuchsia-800">
+          <div className="flex min-w-0 items-center gap-4 rounded-2xl border border-[#875844]/15 bg-white/75 p-4 shadow-sm backdrop-blur sm:p-5">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#f1e3cf] text-[#765038]">
               <BookPlusIcon className="size-5" />
             </span>
             <div>

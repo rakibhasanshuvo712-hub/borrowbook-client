@@ -101,18 +101,18 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-fuchsia-100 via-background to-amber-100 px-4 py-12 sm:px-6">
-      <div className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-orange-300/25 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 -bottom-24 size-72 rounded-full bg-teal-300/25 blur-3xl" />
-      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-card shadow-2xl shadow-emerald-950/10 ring-1 ring-emerald-900/10 md:grid-cols-2">
+    <div className="relative isolate flex flex-1 items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#ead9b7] via-background to-[#dcece7] px-3 py-7 sm:px-6 sm:py-12">
+      <div className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-[#bd8960]/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 -bottom-24 size-72 rounded-full bg-[#75a99d]/25 blur-3xl" />
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-3xl bg-card shadow-2xl shadow-[#193a42]/15 ring-1 ring-[#193a42]/15 sm:rounded-[2rem] md:grid-cols-2">
         <Card className="order-2 w-full max-w-sm justify-self-center self-center bg-transparent py-0 ring-0 shadow-none md:order-1">
-        <CardHeader className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 px-6 py-6 text-white sm:px-8">
+        <CardHeader className="bg-gradient-to-r from-[#1f5960] to-[#28706b] px-5 py-5 text-white sm:px-8 sm:py-6">
           <CardTitle className="text-xl font-semibold">Create your account</CardTitle>
           <CardDescription className="text-white/85">
             Join BookNook to borrow, share, and track books.
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-6 py-7 sm:px-8">
+        <CardContent className="px-5 py-6 sm:px-8 sm:py-7">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="register-name">Name</Label>
@@ -211,7 +211,7 @@ export function RegisterForm() {
           </p>
         </CardContent>
         </Card>
-        <aside className="relative order-1 hidden min-h-[700px] flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-700 via-fuchsia-600 to-rose-500 p-10 text-white md:order-2 md:flex">
+        <aside className="relative order-1 hidden min-h-[700px] flex-col justify-between overflow-hidden bg-gradient-to-br from-[#1f5960] via-[#24565c] to-[#875844] p-10 text-white md:order-2 md:flex">
           <div className="absolute -top-20 -right-20 size-72 rounded-full border-[36px] border-white/10" />
           <div className="absolute -bottom-12 -left-12 size-56 rounded-full border border-white/20" />
           <div className="relative flex size-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur">

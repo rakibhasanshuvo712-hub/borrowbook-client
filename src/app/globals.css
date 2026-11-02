@@ -167,7 +167,7 @@
     border: 1px solid oklch(0.995 0.009 96 / 0.85);
     border-radius: 1.6rem;
     padding: 1.6rem;
-    background: linear-gradient(112deg, oklch(0.94 0.075 91), oklch(0.965 0.045 190) 58%, oklch(0.95 0.06 315));
+    background: linear-gradient(112deg, oklch(0.93 0.045 75), oklch(0.95 0.045 190) 58%, oklch(0.94 0.055 50));
     box-shadow: 0 20px 45px -34px oklch(0.24 0.045 190 / 0.45);
   }
   .account-banner::after {
@@ -193,7 +193,7 @@
     background: linear-gradient(145deg, oklch(0.98 0.025 190), oklch(0.94 0.055 180));
   }
   .step-card:nth-child(4n + 3) {
-    background: linear-gradient(145deg, oklch(0.985 0.025 322), oklch(0.955 0.045 306));
+    background: linear-gradient(145deg, oklch(0.985 0.02 57), oklch(0.955 0.045 42));
   }
   .step-card:nth-child(4n + 4) {
     background: linear-gradient(145deg, oklch(0.99 0.025 47), oklch(0.96 0.05 37));
@@ -205,7 +205,7 @@
     background: linear-gradient(145deg, oklch(0.98 0.025 190), oklch(0.95 0.045 180));
   }
   .reader-card:nth-child(3n + 3) {
-    background: linear-gradient(145deg, oklch(0.985 0.025 322), oklch(0.955 0.04 307));
+    background: linear-gradient(145deg, oklch(0.985 0.02 57), oklch(0.955 0.04 42));
   }
   [data-slot="button"]:not(:disabled):hover {
     transform: translateY(-1px);
