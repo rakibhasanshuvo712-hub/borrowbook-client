@@ -156,6 +156,12 @@
     border-color: oklch(0.68 0.12 184 / 0.55);
     box-shadow: 0 24px 44px -28px oklch(0.24 0.045 190 / 0.48);
   }
+  .hero-book-float {
+    animation: hero-book-float 5s ease-in-out infinite;
+  }
+  .hero-book-float-delayed {
+    animation: hero-book-float 5s ease-in-out 1.2s infinite;
+  }
   .shelf-panel {
     border-block: 1px solid oklch(0.75 0.09 88 / 0.35);
     background: linear-gradient(115deg, oklch(0.95 0.055 91 / 0.72), oklch(0.98 0.025 190 / 0.72) 54%, oklch(0.95 0.04 320 / 0.56));
@@ -215,6 +221,16 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@keyframes hero-book-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
   }
 }
 

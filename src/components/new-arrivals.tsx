@@ -80,7 +80,7 @@ export function NewArrivals() {
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.4, delay: index * 0.07 }}
             >
-              <article className="group flex h-full flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10 transition-shadow duration-200 hover:shadow-md">
+              <article className="book-card group flex h-full flex-col overflow-hidden rounded-2xl">
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
                   <Image
                     src={book.image}

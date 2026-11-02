@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Autoplay, Navigation, Pagination } from "swiper/modules"
-import { ArrowRightIcon, BookOpenIcon } from "lucide-react"
+import { ArrowRightIcon, BookOpenIcon, SparklesIcon } from "lucide-react"
 import { cn } from "cn"
 import { buttonVariants } from "@/components/ui/button"
 
@@ -52,7 +52,38 @@ function SlideContent({ slide }: { slide: Slide }) {
         aria-hidden="true"
         className="absolute -right-8 -bottom-32 size-80 rounded-full border-[36px] border-white/10 blur-[1px] sm:right-20 sm:size-[28rem]"
       />
-      <div className="relative max-w-2xl">
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 right-10 hidden h-[22rem] w-[25rem] -translate-y-1/2 xl:block">
+        <div className="absolute inset-5 rotate-3 rounded-[2rem] border border-white/10 bg-white/[0.04] backdrop-blur-sm" />
+        <div className="hero-book-float absolute bottom-7 left-4 h-56 w-40 -rotate-[11deg] rounded-2xl bg-gradient-to-br from-[#42666a] to-[#203a40] p-2 shadow-2xl shadow-black/30 ring-1 ring-white/20">
+          <div className="flex h-full flex-col justify-between rounded-xl border border-white/15 p-4">
+            <BookOpenIcon className="size-7 text-[#e3b67b]" />
+            <div>
+              <div className="mb-3 h-0.5 w-9 rounded-full bg-[#e3b67b]" />
+              <p className="text-lg leading-tight font-semibold tracking-[0.12em] text-white">STORIES<br />TO SHARE</p>
+              <p className="mt-2 text-[0.6rem] tracking-[0.2em] text-white/60 uppercase">BookNook edition</p>
+            </div>
+          </div>
+        </div>
+        <div className="hero-book-float-delayed absolute top-5 right-5 h-60 w-44 rotate-[9deg] rounded-2xl bg-gradient-to-br from-[#efd09a] via-[#d8a16d] to-[#9b604b] p-2 shadow-2xl shadow-black/30 ring-1 ring-white/35">
+          <div className="flex h-full flex-col justify-between rounded-xl border border-[#5a4033]/20 p-4 text-[#293d3d]">
+            <div className="flex items-center justify-between">
+              <span className="text-[0.6rem] font-bold tracking-[0.2em] uppercase">A good read</span>
+              <SparklesIcon className="size-4" />
+            </div>
+            <div>
+              <p className="font-serif text-[2.65rem] leading-[0.9] tracking-[-0.07em]">Pass<br />it on.</p>
+              <div className="mt-4 flex items-center gap-2 text-xs font-semibold">
+                <span className="flex size-7 items-center justify-center rounded-full bg-[#293d3d] text-[#efd09a]">
+                  <BookOpenIcon className="size-3.5" />
+                </span>
+                Borrow • Read • Return
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute right-1 bottom-8 size-16 rounded-full border border-white/20 bg-white/[0.06] shadow-lg backdrop-blur-sm" />
+      </div>
+      <div className="relative max-w-2xl xl:max-w-xl">
         <span
           className={cn(
             "inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide backdrop-blur",
@@ -88,7 +119,7 @@ export function HeroSlider() {
       <div className="hero-slider relative">
         <Swiper
           modules={[Autoplay, Pagination, Navigation]}
-          autoplay={{ delay: 5500, disableOnInteraction: false }}
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
           pagination={{ clickable: true }}
           navigation
           loop

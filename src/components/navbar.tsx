@@ -158,7 +158,7 @@ function UserMenu({
       >
         <Avatar>
           <AvatarImage src={user.photo || undefined} alt={user.name} />
-          <AvatarFallback className="bg-[#244c52] text-[#f0d49e]">
+          <AvatarFallback className="bg-[#244c52] text-white">
             <UserRoundIcon aria-hidden="true" className="size-4" />
           </AvatarFallback>
         </Avatar>

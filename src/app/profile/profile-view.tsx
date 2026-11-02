@@ -81,7 +81,7 @@ function ProfileCard({ user, onEdit }: { user: User; onEdit: () => void }) {
             <div aria-hidden="true" className="absolute -inset-1 rounded-full bg-gradient-to-br from-[#d8b77c] to-[#28666a] opacity-80 blur-[1px]" />
             <Avatar className="relative size-24 border-4 border-card shadow-lg sm:size-28">
               <AvatarImage src={user.photo || undefined} alt={`${user.name}'s profile photo`} />
-              <AvatarFallback className="bg-[#244c52] text-2xl font-semibold text-[#f0d49e]">
+              <AvatarFallback className="bg-[#244c52] text-white">
                 <UserRoundIcon aria-hidden="true" className="size-12" />
               </AvatarFallback>
             </Avatar>
@@ -226,7 +226,7 @@ function EditProfileForm({
           <div className="flex flex-col items-center gap-4 rounded-2xl bg-muted/45 p-4 sm:flex-row sm:p-5">
             <Avatar className="size-20 border-4 border-card shadow-md">
               <AvatarImage src={photo || undefined} alt={name || "Profile photo preview"} />
-              <AvatarFallback className="bg-[#244c52] text-lg font-semibold text-[#f0d49e]">
+              <AvatarFallback className="bg-[#244c52] text-white">
                 <UserRoundIcon aria-hidden="true" className="size-9" />
               </AvatarFallback>
             </Avatar>
