@@ -5,7 +5,14 @@ import { Toast as ToastPrimitive } from "@base-ui/react/toast"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
-import { XIcon, CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import {
+  CircleCheckIcon,
+  InfoIcon,
+  Loader2Icon,
+  OctagonXIcon,
+  TriangleAlertIcon,
+  XIcon,
+} from "lucide-react"
 
 const toast = ToastPrimitive.createToastManager()
 
@@ -22,7 +29,7 @@ function ToastViewport({ className, ...props }: ToastPrimitive.Viewport.Props) {
     <ToastPrimitive.Viewport
       data-slot="toast-viewport"
       className={cn(
-        "pointer-events-none fixed inset-x-4 bottom-4 z-50 mx-auto w-auto max-w-sm outline-none sm:right-4 sm:left-auto sm:mx-0 sm:w-full",
+        "pointer-events-none fixed inset-x-3 bottom-4 z-50 mx-auto w-auto max-w-[calc(100vw-1.5rem)] outline-none sm:inset-x-auto sm:right-5 sm:bottom-5 sm:mx-0 sm:w-full sm:max-w-sm",
         className
       )}
       {...props}
@@ -30,12 +37,13 @@ function ToastViewport({ className, ...props }: ToastPrimitive.Viewport.Props) {
   )
 }
 
-function Toast({ className, ...props }: ToastPrimitive.Root.Props) {
+function Toast({ className, toast, ...props }: ToastPrimitive.Root.Props) {
   return (
     <ToastPrimitive.Root
       data-slot="toast"
+      toast={toast}
       className={cn(
-        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-2xl border border-teal-900/10 bg-popover text-popover-foreground shadow-xl shadow-teal-950/15 will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom overflow-hidden rounded-2xl border border-foreground/10 border-l-4 bg-popover text-popover-foreground shadow-2xl shadow-foreground/15 will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
         "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
         "h-(--height) [transform:translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(var(--scale))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms]",
         "after:absolute after:top-full after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-['']",
@@ -50,6 +58,11 @@ function Toast({ className, ...props }: ToastPrimitive.Root.Props) {
         "data-expanded:data-ending-style:data-[swipe-direction=left]:[transform:translateX(calc(var(--toast-swipe-movement-x)-150%))_translateY(var(--offset-y))]",
         "data-expanded:data-ending-style:data-[swipe-direction=right]:[transform:translateX(calc(var(--toast-swipe-movement-x)+150%))_translateY(var(--offset-y))]",
         "data-expanded:data-ending-style:data-[swipe-direction=up]:[transform:translateY(calc(var(--toast-swipe-movement-y)-150%))]",
+        toast.type === "success" && "border-l-emerald-500",
+        toast.type === "error" && "border-l-rose-500",
+        toast.type === "warning" && "border-l-amber-500",
+        toast.type === "info" && "border-l-sky-500",
+        toast.type === "loading" && "border-l-primary",
         className
       )}
       {...props}
@@ -62,7 +75,7 @@ function ToastContent({ className, ...props }: ToastPrimitive.Content.Props) {
     <ToastPrimitive.Content
       data-slot="toast-content"
       className={cn(
-        "flex h-full items-center gap-3 overflow-hidden p-4 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100",
+        "flex h-full items-start gap-3 overflow-hidden p-3.5 transition-opacity duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] data-behind:opacity-0 data-expanded:opacity-100 sm:gap-3.5 sm:p-4",
         className
       )}
       {...props}
@@ -74,7 +87,7 @@ function ToastTitle({ className, ...props }: ToastPrimitive.Title.Props) {
   return (
     <ToastPrimitive.Title
       data-slot="toast-title"
-      className={cn("text-sm font-medium", className)}
+    className={cn("text-sm leading-snug font-semibold tracking-tight", className)}
       {...props}
     />
   )
@@ -87,7 +100,7 @@ function ToastDescription({
   return (
     <ToastPrimitive.Description
       data-slot="toast-description"
-      className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-xs leading-relaxed text-muted-foreground sm:text-sm", className)}
       {...props}
     />
   )
@@ -120,7 +133,7 @@ function ToastClose({
       aria-label="Close toast"
       render={render}
       className={cn(
-        "relative shrink-0 text-muted-foreground after:absolute after:-inset-2 after:content-[''] hover:text-foreground",
+        "relative -mt-1 -mr-1 shrink-0 rounded-full text-muted-foreground after:absolute after:-inset-2 after:content-[''] hover:bg-muted hover:text-foreground",
         className
       )}
       {...props}
@@ -178,7 +191,7 @@ function ToastIcon({ type }: { type: string | undefined }) {
         type === "error" && "bg-rose-100 text-rose-700",
         type === "warning" && "bg-amber-100 text-amber-800",
         type === "info" && "bg-sky-100 text-sky-700",
-        type === "loading" && "bg-teal-100 text-teal-700"
+        type === "loading" && "bg-primary/10 text-primary"
       )}
     >
       {icon}
@@ -197,8 +210,7 @@ function ToastList() {
           <ToastTitle />
           <ToastDescription />
         </div>
-        <ToastAction />
-        <ToastClose />
+        <ToastClose className="mt-[-0.15rem]" />
       </ToastContent>
     </Toast>
   ))

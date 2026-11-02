@@ -57,13 +57,13 @@ export function MyBooksView() {
   const [savingEdit, setSavingEdit] = React.useState(false)
   const [deleting, setDeleting] = React.useState<Book | null>(null)
   const [confirmingDelete, setConfirmingDelete] = React.useState(false)
+  const ownerEmail = user?.email.trim().toLowerCase()
 
   const load = React.useCallback(async () => {
     setError(null)
     setBooks(null)
     try {
       const all = await fetchBooks()
-      const ownerEmail = user?.email.trim().toLowerCase()
       setBooks(
         all.filter(
           (book) => book.userEmail.trim().toLowerCase() === ownerEmail
@@ -79,7 +79,7 @@ export function MyBooksView() {
         description: message,
       })
     }
-  }, [user?.email])
+  }, [ownerEmail])
 
   React.useEffect(() => {
     if (requested.current) return
